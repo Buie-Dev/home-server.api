@@ -1,0 +1,35 @@
+swagger: "2.0"
+info:
+  title: "Irrigation API"
+  description: "API for managing irrigation system."
+  version: "1.0.0"
+
+host: "localhost:5000"
+basePath: "/"
+schemes:
+  - "http"
+
+paths:
+  /:
+    get:
+      summary: "Test connection to the API."
+      description: "Returns a simple status message to confirm the API is running."
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            type: "object"
+            properties:
+              Status:
+                type: "string"
+                example: "Connected"
+
+swagger_ui: true
+specs:
+  - endpoint: apispec
+    route: /apispec.json
+    rule_filter: "lambda rule: True"
+    model_filter: "lambda tag: True"
+
+static_url_path: /flasgger_static
+specs_route: /apidocs
