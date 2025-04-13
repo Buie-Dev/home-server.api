@@ -2,4 +2,5 @@ flask
 flasgger
 pymysql
 python-dotenv
-
+flask-cors
+cryptography

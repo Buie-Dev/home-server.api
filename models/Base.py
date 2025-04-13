@@ -13,7 +13,7 @@ class Base:
         setsession=[],  # Session commands if needed
         ping=1,  # Check if connection is alive (0=never, 1=default)
         **Config.get_db_config(),
-        cursorclass=pymysql.cursors.DictCursor
+        cursorclass=pymysql.cursors.DictCursor,
     )
 
     @staticmethod
