@@ -4,3 +4,5 @@ pymysql
 python-dotenv
 flask-cors
 cryptography
+dbutils
+pika
