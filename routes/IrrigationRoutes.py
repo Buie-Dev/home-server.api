@@ -18,7 +18,9 @@ irrigation = Blueprint("irrigation", __name__)
 
 @irrigation.route("/zones", methods=["GET"])
 def fetch_zones() -> List[Zone]:
+    print("Fetching Zones")
     try:
+        print("Fetching Zones")
         data = IrrigationControllers.fetch_zones()
         print(data)
         return format_return(data)
