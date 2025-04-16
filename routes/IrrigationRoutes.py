@@ -24,4 +24,4 @@ def fetch_zones() -> List[Zone]:
         return format_return(data)
     except Exception as e:
         print(f"Error fetching zones: {e}")
-        return error_return({"error": "Failed to fetch zones"}, 500)
+        return error_return({"error": "Failed to fetch all zones"}, 500)
