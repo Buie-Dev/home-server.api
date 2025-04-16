@@ -1,11 +1,14 @@
 
-
+networks:
+  home-server:
+    external: true
 
 services:
-  home_server:
-    network_mode: "host"
+  home_server_api:
+    networks:
+      - home-server
     build: .
-    container_name: home_server
+    container_name: home_server_api
     environment:
       CONFIG_FILE: /run/secrets/config.json
     volumes:
