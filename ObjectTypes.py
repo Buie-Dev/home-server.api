@@ -24,3 +24,15 @@ class Zone(TypedDict):
 class Subzone(TypedDict):
     id: int
     state: int
+
+
+class CreateScheduleParams(TypedDict):
+    monday: bool
+    tuesday: bool
+    wednesday: bool
+    thursday: bool
+    friday: bool
+    saturday: bool
+    sunday: bool
+    start_time: bool
+    duration: bool

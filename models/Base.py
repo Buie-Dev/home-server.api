@@ -21,6 +21,28 @@ class Base:
         return Base.pool.connection()
 
     @staticmethod
+    def custom_insert(query, params=None, connection=None):
+        if connection is not None:
+            print("Has connection")
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+                connection.commit()
+                inserted_id = cursor.lastrowid
+                print(f"Inserted ID: {inserted_id}")
+                return {"inserted_id": inserted_id}
+        else:
+            conn = Base.get_connection()
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, params)
+                    conn.commit()
+                    inserted_id = cursor.lastrowid
+                    print(f"Inserted ID: {inserted_id}")
+                    return {"inserted_id": inserted_id}
+            finally:
+                conn.close()
+
+    @staticmethod
     def custom_query(query, params=None, connection=None):
 
         if connection is not None:
@@ -39,5 +61,27 @@ class Base:
 
                     print(data)
                     return data
+            finally:
+                conn.close()
+
+    @staticmethod
+    def custom_delete(query, params=None, connection=None):
+        if connection is not None:
+            print("Has connection")
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+                connection.commit()
+                affected_rows = cursor.rowcount
+                print(f"Deleted {affected_rows} row(s)")
+                return {"deleted": affected_rows}
+        else:
+            conn = Base.get_connection()
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, params)
+                    conn.commit()
+                    affected_rows = cursor.rowcount
+                    print(f"Deleted {affected_rows} row(s)")
+                    return {"deleted": affected_rows}
             finally:
                 conn.close()
