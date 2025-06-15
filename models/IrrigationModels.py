@@ -6,6 +6,7 @@ from ObjectTypes import (
     CreateScheduleParams,
     AutomationSchedule,
     ToggleScheduleParams,
+    ZoneType,
 )
 
 
@@ -86,10 +87,24 @@ class IrrigationModels:
         return Base.custom_delete(sql, params=(id))
 
     @staticmethod
-    def fetch_zones() -> List[ModelZone]:
+    def fetch_zones(zone_type_id: Optional[int] = None) -> List[ModelZone]:
         connection = Base.get_connection()
-        sql = "SELECT id, name, zone FROM zones WHERE active = 1"
-        return Base.custom_query(sql, connection=connection)
+        params = []
+        sql = """
+            SELECT 
+                z.id, 
+                z.name, 
+                z.zone, 
+                zt.type
+            FROM zones AS z
+            JOIN zone_types AS zt ON z.zone_type_id = zt.id
+            WHERE active = 1
+        """
+        if zone_type_id:
+            sql += " AND zone_type_id = %s"
+            params.append(zone_type_id)
+        sql += " ORDER BY sort_order ASC"
+        return Base.custom_query(sql, params=params, connection=connection)
 
     @staticmethod
     def fetch_zone(id: int) -> ModelZone:
@@ -164,3 +179,9 @@ class IrrigationModels:
         """
         params = (data["active"], id)
         return Base.custom_update(sql, params=params, connection=connection)
+
+    @staticmethod
+    def fetch_zone_types() -> List[ZoneType]:
+        connection = Base.get_connection()
+        sql = "SELECT id, type FROM zone_types"
+        return Base.custom_query(sql, connection=connection)

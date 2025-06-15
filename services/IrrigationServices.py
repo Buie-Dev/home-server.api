@@ -5,8 +5,9 @@ from ObjectTypes import (
     CreateScheduleParams,
     AutomationCommand,
     ToggleScheduleParams,
+    ZoneType,
 )
-from typing import List
+from typing import List, Optional
 import json
 
 
@@ -47,14 +48,19 @@ class IrrigationServices:
         return IrrigationModels.delete_schedule(id)
 
     @staticmethod
-    def fetch_zones() -> List[Zone]:
+    def fetch_zones(zone_type_id: Optional[int] = None) -> List[Zone]:
         try:
 
-            zones_model = IrrigationModels.fetch_zones()
+            zones_model = IrrigationModels.fetch_zones(zone_type_id)
             subzones = IrrigationModels.fetch_subzones()
 
             zones: List[Zone] = [
-                {"id": zm["id"], "name": zm["name"], "zone": zm["zone"]}
+                {
+                    "id": zm["id"],
+                    "name": zm["name"],
+                    "zone": zm["zone"],
+                    "type": zm["type"],
+                }
                 for zm in zones_model
             ]
             for subzone in subzones:
@@ -126,3 +132,7 @@ class IrrigationServices:
     @staticmethod
     def toggle_schedule(id: int, data: ToggleScheduleParams):
         return IrrigationModels.toggle_schedule(id, data)
+
+    @staticmethod
+    def fetch_zone_types() -> List[ZoneType]:
+        return IrrigationModels.fetch_zone_types()

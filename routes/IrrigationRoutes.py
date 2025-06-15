@@ -85,11 +85,23 @@ def fetch_automation_schedules() -> Any:
 
 
 @irrigation.route("/zones", methods=["GET"])
-def fetch_zones() -> List[Zone]:
+def fetch_zones() -> Any:
     try:
-        data = IrrigationControllers.fetch_zones()
+        zone_type_id = request.args.get("zoneTypeId", type=int, default=None)
+        data = IrrigationControllers.fetch_zones(zone_type_id)
         return format_return(data)
     except Exception as e:
         traceback.print_exc()
         print(f"Error fetching zones: {e}")
         return error_return({"error": "Failed to fetch all zones"}, 500)
+
+
+@irrigation.route("/zones/types", methods=["GET"])
+def fetch_zone_types() -> Any:
+    try:
+        data = IrrigationControllers.fetch_zone_types()
+        return format_return(data)
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error fetching zone types: {e}")
+        return error_return({"error": "Failed to fetch zone types"}, 500)

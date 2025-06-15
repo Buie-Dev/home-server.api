@@ -1,10 +1,11 @@
 from services.IrrigationServices import IrrigationServices
-from typing import List
+from typing import List, Optional
 from ObjectTypes import (
     Zone,
     CreateScheduleParams,
     AutomationCommand,
     ToggleScheduleParams,
+    ZoneType,
 )
 from mqtt import mqtt
 from lib.irrigation import create_automation_command
@@ -33,9 +34,9 @@ class IrrigationControllers:
         mqtt.publish_delete_schedule(mqtt_client, id)
 
     @staticmethod
-    def fetch_zones() -> List[Zone]:
+    def fetch_zones(zone_type_id: Optional[int] = None) -> List[Zone]:
         try:
-            return IrrigationServices.fetch_zones()
+            return IrrigationServices.fetch_zones(zone_type_id)
         except Exception as e:
             print("Error Fetching Zones in Controller", e)
             raise e
@@ -54,3 +55,7 @@ class IrrigationControllers:
         else:
             IrrigationServices.toggle_schedule(id, data)
             mqtt.publish_delete_schedule(mqtt_client, id)
+
+    @staticmethod
+    def fetch_zone_types() -> List[ZoneType]:
+        return IrrigationServices.fetch_zone_types()

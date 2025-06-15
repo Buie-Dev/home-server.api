@@ -82,3 +82,8 @@ class AutomationCommand(TypedDict):
 
 class ToggleScheduleParams(TypedDict):
     active: bool
+
+
+class ZoneType(TypedDict):
+    id: int
+    type: str
