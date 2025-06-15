@@ -36,3 +36,49 @@ class CreateScheduleParams(TypedDict):
     sunday: bool
     start_time: bool
     duration: bool
+
+
+class AutomationSchedule(TypedDict):
+    id: int
+    zone_id: int
+    monday: bool
+    tuesday: bool
+    wednesday: bool
+    thursday: bool
+    friday: bool
+    saturday: bool
+    sunday: bool
+    start_time: str
+    duration: int
+    subzone_ids: str
+
+
+class AutomationScheduleFormatted(TypedDict):
+    id: int
+    zone_id: int
+    monday: bool
+    tuesday: bool
+    wednesday: bool
+    thursday: bool
+    friday: bool
+    saturday: bool
+    sunday: bool
+    start_time: str
+    duration: int
+    subzone_ids: List[int]
+
+
+class AutomationCommand(TypedDict):
+    id: int
+    start_time: str
+    monday: bool
+    tuesday: bool
+    wednesday: bool
+    thursday: bool
+    friday: bool
+    saturday: bool
+    command: str
+
+
+class ToggleScheduleParams(TypedDict):
+    active: bool

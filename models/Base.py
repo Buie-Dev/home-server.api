@@ -65,6 +65,25 @@ class Base:
                 conn.close()
 
     @staticmethod
+    def single_query(query, params=None, connection=None):
+        if connection is not None:
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+                data = cursor.fetchone()
+                return data
+        else:
+            conn = Base.get_connection()
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, params)
+                    data = cursor.fetchone()
+
+                    print(data)
+                    return data
+            finally:
+                conn.close()
+
+    @staticmethod
     def custom_delete(query, params=None, connection=None):
         if connection is not None:
             print("Has connection")
@@ -83,5 +102,27 @@ class Base:
                     affected_rows = cursor.rowcount
                     print(f"Deleted {affected_rows} row(s)")
                     return {"deleted": affected_rows}
+            finally:
+                conn.close()
+
+    @staticmethod
+    def custom_update(query, params=None, connection=None):
+        if connection is not None:
+            print("Has connection")
+            with connection.cursor() as cursor:
+                cursor.execute(query, params)
+                connection.commit()
+                affected_rows = cursor.rowcount
+                print(f"Updated {affected_rows} row(s)")
+                return {"updated": affected_rows}
+        else:
+            conn = Base.get_connection()
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(query, params)
+                    conn.commit()
+                    affected_rows = cursor.rowcount
+                    print(f"Updated {affected_rows} row(s)")
+                    return {"updated": affected_rows}
             finally:
                 conn.close()

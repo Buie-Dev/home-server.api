@@ -6,3 +6,4 @@ flask-cors
 cryptography
 dbutils
 pika
+paho-mqtt

@@ -10,6 +10,12 @@ class Config:
     API_MYSQL_USERNAME = os.getenv("API_MYSQL_USERNAME")
     API_MYSQL_PASSWORD = os.getenv("API_MYSQL_PASSWORD")
     API_MYSQL_DATABASE = os.getenv("API_MYSQL_DATABASE")
+
+    MQTT_USERNAME = os.getenv("MQTT_USERNAME")
+    MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
+    MQTT_BROKER = os.getenv("MQTT_BROKER")
+    MQTT_PORT = int(os.getenv("MQTT_PORT"))
+
     API_PORT = os.getenv("API_PORT")
 
     @staticmethod
