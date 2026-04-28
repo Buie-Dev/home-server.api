@@ -7,7 +7,9 @@ services:
   webserver:
     networks:
       - home-server
-    build: .
+    build:
+      context: .
+      network: host
     container_name: webserver
     environment:
       CONFIG_FILE: /run/secrets/config.json
