@@ -25,6 +25,10 @@ class Config:
 
     API_PORT = os.getenv("API_PORT")
 
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    APP_USERNAME = os.getenv("APP_USERNAME")
+    APP_PASSWORD_HASH = os.getenv("APP_PASSWORD_HASH")
+
     @staticmethod
     def get_db_config():
         print(

@@ -6,12 +6,16 @@ from flasgger import Swagger
 from flask import Flask, jsonify
 
 from routes.IrrigationRoutes import irrigation
+from routes.AuthRoutes import auth
+from routes.DeviceRoutes import devices
 
 app = Flask(__name__)
 Swagger(app)
 CORS(app)
 # Register blueprints
+app.register_blueprint(auth, url_prefix="/auth")
 app.register_blueprint(irrigation, url_prefix="/irrigations")
+app.register_blueprint(devices, url_prefix="/devices")
 
 
 @app.route("/", methods=["GET"])

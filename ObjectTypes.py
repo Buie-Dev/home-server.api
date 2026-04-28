@@ -12,6 +12,7 @@ class Subzone(TypedDict):
     zone_id: int
     name: str
     subzone: int
+    heads: int
 
 
 class Zone(TypedDict):

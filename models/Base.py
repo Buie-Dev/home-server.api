@@ -7,7 +7,7 @@ class Base:
     pool = PooledDB(
         creator=pymysql,
         maxconnections=10,  # Max open connections
-        mincached=2,  # Min idle connections in the pool
+        mincached=0,  # Don't pre-connect — defer until first use so startup succeeds if MySQL isn't ready yet
         maxcached=5,  # Max idle connections in the pool
         blocking=True,  # Wait if pool is full
         setsession=[],  # Session commands if needed
@@ -23,7 +23,6 @@ class Base:
     @staticmethod
     def custom_insert(query, params=None, connection=None):
         if connection is not None:
-            print("Has connection")
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
                 connection.commit()
@@ -46,7 +45,6 @@ class Base:
     def custom_query(query, params=None, connection=None):
 
         if connection is not None:
-            print("Has connection")
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
                 data = cursor.fetchall()
@@ -86,7 +84,6 @@ class Base:
     @staticmethod
     def custom_delete(query, params=None, connection=None):
         if connection is not None:
-            print("Has connection")
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
                 connection.commit()
@@ -108,7 +105,6 @@ class Base:
     @staticmethod
     def custom_update(query, params=None, connection=None):
         if connection is not None:
-            print("Has connection")
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
                 connection.commit()

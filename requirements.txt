@@ -7,3 +7,5 @@ cryptography
 dbutils
 pika
 paho-mqtt
+PyJWT
+bcrypt

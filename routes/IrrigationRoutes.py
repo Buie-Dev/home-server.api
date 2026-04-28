@@ -6,8 +6,10 @@ import json
 from flask import Blueprint, Flask, jsonify, request
 from controllers.IrrigationControllers import IrrigationControllers
 from routes.base import format_return, error_return
+from lib.auth import check_auth
 
 irrigation = Blueprint("irrigation", __name__)
+irrigation.before_request(check_auth)
 
 
 @irrigation.route("/schedules", methods=["GET"])
@@ -50,6 +52,32 @@ def create_schedule() -> Any:
         return error_return({"error": "Failed to create schedule"}, 500)
 
 
+@irrigation.route("/schedules/<int:id>", methods=["PUT"])
+def update_schedule(id: int) -> Any:
+    try:
+        data = request.get_json()
+        params = {
+            "duration": data["duration"],
+            "name": data["name"],
+            "start_time": data["startTime"],
+            "monday": data["monday"],
+            "tuesday": data["tuesday"],
+            "wednesday": data["wednesday"],
+            "thursday": data["thursday"],
+            "friday": data["friday"],
+            "saturday": data["saturday"],
+            "sunday": data["sunday"],
+            "zone_id": data["zoneId"],
+            "subzone_ids": data.get("subzoneIds", []),
+        }
+        IrrigationControllers.update_schedule(id, params)
+        return format_return({"Success": True})
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error updating schedule: {e}")
+        return error_return({"error": "Failed to update schedule"}, 500)
+
+
 @irrigation.route("/schedules/<int:id>/toggle", methods=["POST"])
 def toggle_schedule(id: int) -> Any:
     try:
@@ -73,10 +101,30 @@ def delete_schedule(id: int) -> Any:
         return error_return({"error": "Failed to delete schedule"}, 500)
 
 
+@irrigation.route("/schedules/sync-status", methods=["GET"])
+def check_sync() -> Any:
+    try:
+        data = IrrigationControllers.check_sync()
+        return format_return(data)
+    except Exception as e:
+        traceback.print_exc()
+        return error_return({"error": "Failed to check sync status"}, 500)
+
+
+@irrigation.route("/schedules/sync", methods=["POST"])
+def force_sync() -> Any:
+    try:
+        data = IrrigationControllers.force_sync()
+        return format_return(data)
+    except Exception as e:
+        traceback.print_exc()
+        return error_return({"error": "Failed to force sync"}, 500)
+
+
 @irrigation.route("/schedules/automation", methods=["GET"])
 def fetch_automation_schedules() -> Any:
     try:
-        data = IrrigationControllers.fetch_automation_schedules()
+        data = IrrigationControllers.fetch_automation_schedules(exclude_inactive=True)
         return format_return(data)
     except Exception as e:
         traceback.print_exc()
@@ -94,6 +142,50 @@ def fetch_zones() -> Any:
         traceback.print_exc()
         print(f"Error fetching zones: {e}")
         return error_return({"error": "Failed to fetch all zones"}, 500)
+
+
+@irrigation.route("/history/totals", methods=["GET"])
+def fetch_history_totals() -> Any:
+    try:
+        zone_id = request.args.get("zoneId", default=None, type=int)
+        subzone_id = request.args.get("subzoneId", default=None, type=int)
+        data = IrrigationControllers.fetch_history_totals(zone_id=zone_id, subzone_id=subzone_id)
+        return format_return(data)
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error fetching history totals: {e}")
+        return error_return({"error": "Failed to fetch history totals"}, 500)
+
+
+@irrigation.route("/history", methods=["GET"])
+def fetch_history() -> Any:
+    try:
+        limit = request.args.get("limit", default=100, type=int)
+        offset = request.args.get("offset", default=0, type=int)
+        zone_id = request.args.get("zoneId", default=None, type=int)
+        subzone_id = request.args.get("subzoneId", default=None, type=int)
+        start_date = request.args.get("startDate", default=None, type=str)
+        end_date = request.args.get("endDate", default=None, type=str)
+        data = IrrigationControllers.fetch_history(limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date)
+        return format_return(data)
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error fetching history: {e}")
+        return error_return({"error": "Failed to fetch history"}, 500)
+
+
+@irrigation.route("/history", methods=["POST"])
+def create_history() -> Any:
+    try:
+        data = request.get_json()
+        print(f"[history] POST received: {data}")
+        IrrigationControllers.create_history(data)
+        print(f"[history] saved ok")
+        return format_return({"Success": True})
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error creating history: {e}")
+        return error_return({"error": "Failed to create history"}, 500)
 
 
 @irrigation.route("/zones/types", methods=["GET"])

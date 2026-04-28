@@ -1,5 +1,6 @@
 import json
 import logging
+import threading
 import time
 import paho.mqtt.client as mqtt
 
@@ -12,8 +13,13 @@ TOPIC_SUB_HEALTH_CHECK_REQUEST = "healthcheck/request"
 TOPIC_PUB_HEALTH_CHECK_RESPONSE = "healthcheck/response"
 TOBIC_PUB_ADD_SCHEDULE = "irrigation/schedule/create"
 TOBIC_PUB_DELETE_SCHEDULE = "irrigation/schedule/delete"
+TOPIC_PUB_SCHEDULE_STATUS_REQUEST = "irrigation/schedule/status/request"
+TOPIC_SUB_SCHEDULE_STATUS_RESPONSE = "irrigation/schedule/status/response"
 
-sub_topics = [TOPIC_SUB_HEALTH_CHECK_REQUEST]
+sub_topics = [TOPIC_SUB_HEALTH_CHECK_REQUEST, TOPIC_SUB_SCHEDULE_STATUS_RESPONSE]
+
+_status_event = threading.Event()
+_latest_status_schedules = None
 
 logger.info("Config.MQTT %s %s %s %s", Config.MQTT_BROKER, Config.MQTT_PASSWORD, Config.MQTT_PORT, Config.MQTT_USERNAME)
 
@@ -60,9 +66,15 @@ def publish_delete_schedule(client, id):
 
 # Callback when a message is received from the broker
 def on_message(client, userdata, msg):
+    global _latest_status_schedules
     try:
         if msg.topic == TOPIC_SUB_HEALTH_CHECK_REQUEST:
             health_check_response(client)
+
+        elif msg.topic == TOPIC_SUB_SCHEDULE_STATUS_RESPONSE:
+            payload = json.loads(msg.payload.decode())
+            _latest_status_schedules = payload.get("schedules", [])
+            _status_event.set()
 
     except json.JSONDecodeError:
         logger.warning("Received non-JSON message: %s on topic %s", msg.payload.decode(), msg.topic)
@@ -76,6 +88,18 @@ def create_mqtt_client():
     client.on_message = on_message
     client.reconnect_delay_set(min_delay=1, max_delay=30)
     return client
+
+
+def request_schedule_status(client):
+    global _latest_status_schedules
+    _latest_status_schedules = None
+    _status_event.clear()
+    publish_message(client, TOPIC_PUB_SCHEDULE_STATUS_REQUEST, {})
+
+
+def wait_for_schedule_status(timeout=5):
+    _status_event.wait(timeout=timeout)
+    return _latest_status_schedules
 
 
 def run_mqtt():

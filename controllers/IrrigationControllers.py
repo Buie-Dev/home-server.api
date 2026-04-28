@@ -8,8 +8,6 @@ from ObjectTypes import (
     ZoneType,
 )
 from mqtt import mqtt
-from lib.irrigation import create_automation_command
-import json
 
 mqtt_client = mqtt.run_mqtt()
 
@@ -29,6 +27,13 @@ class IrrigationControllers:
         mqtt.publish_add_schedule(mqtt_client, automation_command)
 
     @staticmethod
+    def update_schedule(id: int, data: CreateScheduleParams):
+        IrrigationServices.update_schedule(id, data)
+        mqtt.publish_delete_schedule(mqtt_client, id)
+        automation_command = IrrigationServices.fetch_automation_schedule(id)
+        mqtt.publish_add_schedule(mqtt_client, automation_command)
+
+    @staticmethod
     def delete_schedule(id: int):
         IrrigationServices.delete_schedule(id)
         mqtt.publish_delete_schedule(mqtt_client, id)
@@ -42,8 +47,8 @@ class IrrigationControllers:
             raise e
 
     @staticmethod
-    def fetch_automation_schedules() -> List[AutomationCommand]:
-        return IrrigationServices.fetch_automation_schedules()
+    def fetch_automation_schedules(exclude_inactive=False) -> List[AutomationCommand]:
+        return IrrigationServices.fetch_automation_schedules(exclude_inactive=exclude_inactive)
 
     @staticmethod
     def toggle_schedule(id: int, data: ToggleScheduleParams):
@@ -57,5 +62,34 @@ class IrrigationControllers:
             mqtt.publish_delete_schedule(mqtt_client, id)
 
     @staticmethod
+    def check_sync():
+        mqtt.request_schedule_status(mqtt_client)
+        automation_schedules = mqtt.wait_for_schedule_status(timeout=5)
+        if automation_schedules is None:
+            return {"error": "No response from automation service", "timeout": True}
+        return IrrigationServices.compare_sync(automation_schedules)
+
+    @staticmethod
+    def force_sync():
+        schedules = IrrigationServices.fetch_active_automation_schedules()
+        for s in schedules:
+            mqtt.publish_delete_schedule(mqtt_client, s["id"])
+        for s in schedules:
+            mqtt.publish_add_schedule(mqtt_client, s)
+        return {"synced": len(schedules)}
+
+    @staticmethod
     def fetch_zone_types() -> List[ZoneType]:
         return IrrigationServices.fetch_zone_types()
+
+    @staticmethod
+    def fetch_history(limit: int = 100, offset: int = 0, zone_id: int = None, subzone_id: int = None, start_date: str = None, end_date: str = None):
+        return IrrigationServices.fetch_history(limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date)
+
+    @staticmethod
+    def fetch_history_totals(zone_id: int = None, subzone_id: int = None):
+        return IrrigationServices.fetch_history_totals(zone_id=zone_id, subzone_id=subzone_id)
+
+    @staticmethod
+    def create_history(data):
+        return IrrigationServices.create_history(data)
