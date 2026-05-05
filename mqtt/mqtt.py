@@ -36,7 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:
-        logger.warning("Unexpected disconnection from broker (rc=%s)", rc)
+        logger.warning("Unexpected disconnection from broker (rc=%s). loop_forever will reconnect.", rc)
 
 
 def health_check_response(client):
@@ -104,14 +104,12 @@ def wait_for_schedule_status(timeout=5):
 
 def run_mqtt():
     client = create_mqtt_client()
-    delay = 1
     while True:
         try:
             logger.info("Connecting to broker %s on port %s", Config.MQTT_BROKER, Config.MQTT_PORT)
             client.connect(Config.MQTT_BROKER, Config.MQTT_PORT, 60)
-            client.loop_start()
+            threading.Thread(target=client.loop_forever, daemon=True).start()
             return client
         except Exception as e:
-            logger.error("Failed to connect to broker: %s. Retrying in %ss...", e, delay)
-            time.sleep(delay)
-            delay = min(delay * 2, 30)
+            logger.error("Failed to connect to broker: %s. Retrying in 10s...", e)
+            time.sleep(10)

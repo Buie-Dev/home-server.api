@@ -365,6 +365,17 @@ class IrrigationServices:
                     print(f"[history] inserting subzone record: {sz_params}")
                     IrrigationModels.create_history(sz_params)
                 return
-            print(f"[history] total_heads=0, falling back to zone-level insert")
+            # No heads defined: divide equally among subzones (1 subzone = full volume)
+            print(f"[history] total_heads=0, dividing equally among {len(subzones)} subzone(s)")
+            equal_litres = round(params["litres"] / len(subzones), 2)
+            for sz in subzones:
+                sz_params = {
+                    **params,
+                    "subzone_id": sz["id"],
+                    "litres": equal_litres,
+                }
+                print(f"[history] inserting subzone record: {sz_params}")
+                IrrigationModels.create_history(sz_params)
+            return
         print(f"[history] inserting zone-level record")
         return IrrigationModels.create_history(params)
