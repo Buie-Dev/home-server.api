@@ -71,12 +71,13 @@ class IrrigationControllers:
 
     @staticmethod
     def force_sync():
-        schedules = IrrigationServices.fetch_active_automation_schedules()
-        for s in schedules:
+        all_schedules = IrrigationServices.fetch_automation_schedules(include_deleted=True)
+        for s in all_schedules:
             mqtt.publish_delete_schedule(mqtt_client, s["id"])
-        for s in schedules:
+        active_schedules = IrrigationServices.fetch_active_automation_schedules()
+        for s in active_schedules:
             mqtt.publish_add_schedule(mqtt_client, s)
-        return {"synced": len(schedules)}
+        return {"synced": len(active_schedules)}
 
     @staticmethod
     def fetch_zone_types() -> List[ZoneType]:

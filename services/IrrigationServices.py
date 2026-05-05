@@ -140,9 +140,9 @@ class IrrigationServices:
         return create_automation_command(zone, automation_schedule_formatted, id)
 
     @staticmethod
-    def fetch_automation_schedules(exclude_inactive=False) -> List[AutomationCommand]:
+    def fetch_automation_schedules(exclude_inactive=False, include_deleted=False) -> List[AutomationCommand]:
         automation_schedules = IrrigationModels.fetch_automation_schedules(
-            exclude_inactive=exclude_inactive
+            exclude_inactive=exclude_inactive, include_deleted=include_deleted
         )
         print(
             f"---------------------------automation_schedules: {automation_schedules}"

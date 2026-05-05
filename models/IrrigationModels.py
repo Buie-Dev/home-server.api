@@ -180,9 +180,14 @@ class IrrigationModels:
         return Base.single_query(sql, params=params, connection=connection)
 
     @staticmethod
-    def fetch_automation_schedules(exclude_inactive=False) -> List[AutomationSchedule]:
+    def fetch_automation_schedules(exclude_inactive=False, include_deleted=False) -> List[AutomationSchedule]:
         connection = Base.get_connection()
-        active_filter = "AND active = 1" if exclude_inactive else ""
+        conditions = []
+        if not include_deleted:
+            conditions.append("deleted_at IS NULL")
+        if exclude_inactive:
+            conditions.append("active = 1")
+        where_clause = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         sql = f"""
             SELECT
                 s.id,
@@ -199,7 +204,7 @@ class IrrigationModels:
                 JSON_ARRAYAGG(ss.subzone_id) AS subzone_ids
             FROM schedules AS s
             LEFT JOIN subzone_schedules AS ss ON s.id = ss.schedule_id
-            WHERE deleted_at IS NULL {active_filter}
+            {where_clause}
             GROUP BY s.id, s.zone_id
             """
         return Base.custom_query(sql, connection=connection)
