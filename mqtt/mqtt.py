@@ -81,12 +81,17 @@ def on_message(client, userdata, msg):
 
 
 def create_mqtt_client():
-    client = mqtt.Client()
+    try:
+        # paho-mqtt 2.x requires explicit callback API version
+        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+    except AttributeError:
+        # paho-mqtt 1.x
+        client = mqtt.Client()
     client.username_pw_set(Config.MQTT_USERNAME, Config.MQTT_PASSWORD)
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
     client.on_message = on_message
-    client.reconnect_delay_set(min_delay=1, max_delay=30)
+    client.reconnect_delay_set(min_delay=1, max_delay=120)
     return client
 
 
@@ -102,13 +107,25 @@ def wait_for_schedule_status(timeout=5):
     return _latest_status_schedules
 
 
+def _mqtt_loop(client):
+    """Run loop_forever in a watchdog loop — restarts if it exits or crashes."""
+    while True:
+        try:
+            logger.info("Starting MQTT loop_forever")
+            client.loop_forever(retry_first_connection=True)
+            logger.warning("loop_forever returned cleanly — restarting loop in 5s")
+        except Exception as e:
+            logger.error("MQTT loop_forever raised: %s. Restarting in 5s...", e)
+        time.sleep(5)
+
+
 def run_mqtt():
     client = create_mqtt_client()
     while True:
         try:
             logger.info("Connecting to broker %s on port %s", Config.MQTT_BROKER, Config.MQTT_PORT)
             client.connect(Config.MQTT_BROKER, Config.MQTT_PORT, 60)
-            threading.Thread(target=client.loop_forever, daemon=True).start()
+            threading.Thread(target=_mqtt_loop, args=(client,), daemon=True).start()
             return client
         except Exception as e:
             logger.error("Failed to connect to broker: %s. Retrying in 10s...", e)
