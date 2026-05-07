@@ -36,7 +36,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_disconnect(client, userdata, rc):
     if rc != 0:
-        logger.warning("Unexpected disconnection from broker (rc=%s). loop_forever will reconnect.", rc)
+        logger.warning("Unexpected disconnection from broker (rc=%s)", rc)
 
 
 def health_check_response(client):
@@ -78,6 +78,8 @@ def on_message(client, userdata, msg):
 
     except json.JSONDecodeError:
         logger.warning("Received non-JSON message: %s on topic %s", msg.payload.decode(), msg.topic)
+    except Exception as e:
+        logger.error("Error handling message on topic %s: %s", msg.topic, e)
 
 
 def create_mqtt_client():
@@ -107,25 +109,13 @@ def wait_for_schedule_status(timeout=5):
     return _latest_status_schedules
 
 
-def _mqtt_loop(client):
-    """Run loop_forever in a watchdog loop — restarts if it exits or crashes."""
-    while True:
-        try:
-            logger.info("Starting MQTT loop_forever")
-            client.loop_forever(retry_first_connection=True)
-            logger.warning("loop_forever returned cleanly — restarting loop in 5s")
-        except Exception as e:
-            logger.error("MQTT loop_forever raised: %s. Restarting in 5s...", e)
-        time.sleep(5)
-
-
 def run_mqtt():
     client = create_mqtt_client()
     while True:
         try:
             logger.info("Connecting to broker %s on port %s", Config.MQTT_BROKER, Config.MQTT_PORT)
             client.connect(Config.MQTT_BROKER, Config.MQTT_PORT, 60)
-            threading.Thread(target=_mqtt_loop, args=(client,), daemon=True).start()
+            client.loop_start()
             return client
         except Exception as e:
             logger.error("Failed to connect to broker: %s. Retrying in 10s...", e)

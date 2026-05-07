@@ -25,6 +25,8 @@ class Config:
 
     API_PORT = os.getenv("API_PORT")
 
+    DEVICE_NAME = os.getenv("DEVICE_NAME")
+
     JWT_SECRET = os.getenv("JWT_SECRET")
     APP_USERNAME = os.getenv("APP_USERNAME")
     APP_PASSWORD_HASH = os.getenv("APP_PASSWORD_HASH")
