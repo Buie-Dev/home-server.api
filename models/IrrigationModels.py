@@ -49,7 +49,7 @@ class IrrigationModels:
             params.append(subzone_id)
         sql += " GROUP BY s.id, s.zone_id"
 
-        return Base.custom_query(sql, params or None, connection=connection)
+        return Base.custom_query(sql, params, connection=connection)
 
     @staticmethod
     def create_schedule(params: CreateScheduleParams):
