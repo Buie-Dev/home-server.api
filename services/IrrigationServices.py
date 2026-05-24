@@ -14,8 +14,8 @@ import json
 class IrrigationServices:
 
     @staticmethod
-    def schedules():
-        rows = IrrigationModels.schedules()
+    def schedules(zone_id: Optional[int] = None, subzone_id: Optional[int] = None):
+        rows = IrrigationModels.schedules(zone_id, subzone_id)
         result = []
         for row in rows:
             raw = row.get("subzoneIds")
@@ -341,6 +341,10 @@ class IrrigationServices:
                 }
             )
         return result
+
+    @staticmethod
+    def delete_history(id: int):
+        return IrrigationModels.delete_history(id)
 
     @staticmethod
     def create_history(params):

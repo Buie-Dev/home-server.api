@@ -8,6 +8,8 @@ from flask import Flask, jsonify
 from routes.IrrigationRoutes import irrigation
 from routes.AuthRoutes import auth
 from routes.DeviceRoutes import devices
+from routes.MeganRoutes import megan
+from routes.TodoRoutes import todo
 
 app = Flask(__name__)
 Swagger(app)
@@ -16,6 +18,8 @@ CORS(app)
 app.register_blueprint(auth, url_prefix="/auth")
 app.register_blueprint(irrigation, url_prefix="/irrigations")
 app.register_blueprint(devices, url_prefix="/devices")
+app.register_blueprint(megan, url_prefix="/megan")
+app.register_blueprint(todo, url_prefix="/todo")
 
 
 @app.route("/", methods=["GET"])

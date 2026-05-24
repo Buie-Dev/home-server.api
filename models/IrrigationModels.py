@@ -1,4 +1,5 @@
 from models.Base import Base
+from lib.dates import get_vancouver_date_context
 from typing import List, TypedDict, Optional
 from ObjectTypes import (
     ModelZone,
@@ -13,13 +14,13 @@ from ObjectTypes import (
 class IrrigationModels:
 
     @staticmethod
-    def schedules():
+    def schedules(zone_id: Optional[int] = None, subzone_id: Optional[int] = None):
         connection = Base.get_connection()
         sql = """
-            SELECT 
-                s.id, 
+            SELECT
+                s.id,
                 s.name,
-                TIME_FORMAT(s.start_time, '%H:%i') AS startTime, 
+                TIME_FORMAT(s.start_time, '%%H:%%i') AS startTime,
                 s.duration,
                 s.monday,
                 s.tuesday,
@@ -38,10 +39,17 @@ class IrrigationModels:
             LEFT JOIN subzones AS sz ON ss.subzone_id = sz.id
             JOIN zones AS z ON s.zone_id = z.id
             WHERE s.deleted_at IS NULL
-            GROUP BY s.id, s.zone_id
         """
+        params = []
+        if zone_id is not None:
+            sql += " AND s.zone_id = %s"
+            params.append(zone_id)
+        if subzone_id is not None:
+            sql += " AND EXISTS (SELECT 1 FROM subzone_schedules ss2 WHERE ss2.schedule_id = s.id AND ss2.subzone_id = %s)"
+            params.append(subzone_id)
+        sql += " GROUP BY s.id, s.zone_id"
 
-        return Base.custom_query(sql, connection=connection)
+        return Base.custom_query(sql, params or None, connection=connection)
 
     @staticmethod
     def create_schedule(params: CreateScheduleParams):
@@ -265,14 +273,14 @@ class IrrigationModels:
             FROM irrigation_history AS h
             LEFT JOIN zones AS z ON h.zone_id = z.zone
             LEFT JOIN zone_types AS zt ON z.zone_type_id = zt.id
-            LEFT JOIN subzones AS sz ON h.subzone_id = sz.id
-            WHERE 1=1
+            LEFT JOIN subzones AS sz ON h.subzone_id = sz.subzone
+            WHERE h.deleted_at IS NULL
         """
         if zone_id is not None:
             sql += " AND z.id = %s"
             params.append(zone_id)
         if subzone_id is not None:
-            sql += " AND h.subzone_id = %s"
+            sql += " AND sz.id = %s"
             params.append(subzone_id)
         if start_date is not None:
             sql += " AND h.date >= %s"
@@ -286,30 +294,42 @@ class IrrigationModels:
 
     @staticmethod
     def fetch_history_totals(zone_id: int = None, subzone_id: int = None):
+        dc = get_vancouver_date_context()
         connection = Base.get_connection()
-        params = []
+        params = [
+            dc['today'], dc['today'], dc['today'],
+            dc['week_ago'], dc['week_ago'], dc['week_ago'],
+            dc['year'], dc['month'], dc['year'], dc['month'], dc['year'], dc['month'],
+        ]
         sql = """
             SELECT
-                COALESCE(SUM(CASE WHEN h.date = CURDATE() THEN h.litres ELSE 0 END), 0) AS today_litres,
-                COALESCE(SUM(CASE WHEN h.date = CURDATE() THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS today_seconds,
-                COALESCE(COUNT(CASE WHEN h.date = CURDATE() THEN 1 END), 0) AS today_runs,
-                COALESCE(SUM(CASE WHEN h.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN h.litres ELSE 0 END), 0) AS week_litres,
-                COALESCE(SUM(CASE WHEN h.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS week_seconds,
-                COALESCE(COUNT(CASE WHEN h.date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) THEN 1 END), 0) AS week_runs,
-                COALESCE(SUM(CASE WHEN MONTH(h.date) = MONTH(CURDATE()) AND YEAR(h.date) = YEAR(CURDATE()) THEN h.litres ELSE 0 END), 0) AS month_litres,
-                COALESCE(SUM(CASE WHEN MONTH(h.date) = MONTH(CURDATE()) AND YEAR(h.date) = YEAR(CURDATE()) THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS month_seconds,
-                COALESCE(COUNT(CASE WHEN MONTH(h.date) = MONTH(CURDATE()) AND YEAR(h.date) = YEAR(CURDATE()) THEN 1 END), 0) AS month_runs
+                COALESCE(SUM(CASE WHEN h.date = %s THEN h.litres ELSE 0 END), 0) AS today_litres,
+                COALESCE(SUM(CASE WHEN h.date = %s THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS today_seconds,
+                COALESCE(COUNT(CASE WHEN h.date = %s THEN 1 END), 0) AS today_runs,
+                COALESCE(SUM(CASE WHEN h.date >= %s THEN h.litres ELSE 0 END), 0) AS week_litres,
+                COALESCE(SUM(CASE WHEN h.date >= %s THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS week_seconds,
+                COALESCE(COUNT(CASE WHEN h.date >= %s THEN 1 END), 0) AS week_runs,
+                COALESCE(SUM(CASE WHEN YEAR(h.date) = %s AND MONTH(h.date) = %s THEN h.litres ELSE 0 END), 0) AS month_litres,
+                COALESCE(SUM(CASE WHEN YEAR(h.date) = %s AND MONTH(h.date) = %s THEN TIME_TO_SEC(h.end_time) - TIME_TO_SEC(h.start_time) ELSE 0 END), 0) AS month_seconds,
+                COALESCE(COUNT(CASE WHEN YEAR(h.date) = %s AND MONTH(h.date) = %s THEN 1 END), 0) AS month_runs
             FROM irrigation_history AS h
             LEFT JOIN zones AS z ON h.zone_id = z.zone
-            WHERE 1=1
+            LEFT JOIN subzones AS sz ON h.subzone_id = sz.subzone
+            WHERE h.deleted_at IS NULL
         """
         if zone_id is not None:
             sql += " AND z.id = %s"
             params.append(zone_id)
         if subzone_id is not None:
-            sql += " AND h.subzone_id = %s"
+            sql += " AND sz.id = %s"
             params.append(subzone_id)
         return Base.single_query(sql, params=params, connection=connection)
+
+    @staticmethod
+    def delete_history(id: int):
+        connection = Base.get_connection()
+        sql = "UPDATE irrigation_history SET deleted_at = NOW() WHERE id = %s"
+        return Base.custom_delete(sql, params=(id,), connection=connection)
 
     @staticmethod
     def create_history(params):

@@ -4,16 +4,17 @@ networks:
     external: true
 
 services:
-  webserver:
+  homeserver-api:
     networks:
       - home-server
     build:
       context: .
       network: host
-    container_name: webserver
+    container_name: homeserver-api
     environment:
       CONFIG_FILE: /run/secrets/config.json
       PYTHONUNBUFFERED: 1
+      TZ: America/Vancouver
     volumes:
       - .:/app  # Mount current directory to /app in the container
     env_file:

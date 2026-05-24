@@ -15,7 +15,9 @@ irrigation.before_request(check_auth)
 @irrigation.route("/schedules", methods=["GET"])
 def schedules() -> Any:
     try:
-        data = IrrigationControllers.schedules()
+        zone_id = request.args.get("zoneId", type=int, default=None)
+        subzone_id = request.args.get("subzoneId", type=int, default=None)
+        data = IrrigationControllers.schedules(zone_id, subzone_id)
         return format_return(data)
     except Exception as e:
         traceback.print_exc()
@@ -172,6 +174,17 @@ def fetch_history() -> Any:
         traceback.print_exc()
         print(f"Error fetching history: {e}")
         return error_return({"error": "Failed to fetch history"}, 500)
+
+
+@irrigation.route("/history/<int:id>", methods=["DELETE"])
+def delete_history(id: int) -> Any:
+    try:
+        IrrigationControllers.delete_history(id)
+        return format_return({"Success": True})
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error deleting history: {e}")
+        return error_return({"error": "Failed to delete history"}, 500)
 
 
 @irrigation.route("/history", methods=["POST"])
