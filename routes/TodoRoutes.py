@@ -8,6 +8,16 @@ todo = Blueprint("todo", __name__)
 todo.before_request(check_auth)
 
 
+@todo.route("/automation", methods=["POST"])
+def run_automation():
+    try:
+        added = TodoControllers.run_automation()
+        return format_return({"success": True, "added": added})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to run todo automation"}, 500)
+
+
 @todo.route("/categories", methods=["GET"])
 def fetch_categories():
     try:

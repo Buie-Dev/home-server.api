@@ -229,6 +229,20 @@ class TodoModels:
         return result
 
     @staticmethod
+    def fetch_templates_for_automation():
+        return Base.custom_query(
+            "SELECT id, frequency, month FROM todo_templates WHERE frequency != 'one_time' AND deleted_at IS NULL"
+        )
+
+    @staticmethod
+    def task_added_today(template_id: int) -> bool:
+        row = Base.single_query(
+            "SELECT id FROM todo_tasks WHERE template_id = %s AND deleted_at IS NULL AND DATE(added_at) = CURDATE()",
+            (template_id,),
+        )
+        return row is not None
+
+    @staticmethod
     def update_task(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int]):
         return Base.custom_update(
             "UPDATE todo_tasks SET title = %s, notes = %s, category_id = %s, subcategory_id = %s WHERE id = %s",

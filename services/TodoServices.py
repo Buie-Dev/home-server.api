@@ -1,3 +1,4 @@
+from datetime import datetime
 from models.TodoModels import TodoModels
 from typing import List, Optional
 
@@ -143,6 +144,36 @@ class TodoServices:
     @staticmethod
     def archive_all_completed():
         return TodoModels.archive_all_completed()
+
+    @staticmethod
+    def run_automation():
+        now = datetime.now()
+        day = now.day
+        weekday = now.weekday()  # 0 = Monday
+        month = now.month
+
+        templates = TodoModels.fetch_templates_for_automation()
+        added = 0
+        for t in templates:
+            freq = t["frequency"]
+            if freq == "daily":
+                should_trigger = True
+            elif freq == "weekly":
+                should_trigger = weekday == 0
+            elif freq == "monthly":
+                should_trigger = day == 1
+            elif freq == "quarterly":
+                should_trigger = day == 1 and month in (1, 4, 7, 10)
+            elif freq == "yearly":
+                should_trigger = day == 1 and month == t.get("month")
+            else:
+                should_trigger = False
+
+            if should_trigger and not TodoModels.task_added_today(t["id"]):
+                TodoModels.add_task(t["id"])
+                added += 1
+
+        return added
 
     @staticmethod
     def update_task(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int]):
