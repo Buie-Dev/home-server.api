@@ -201,6 +201,26 @@ def complete_task(id: int):
         return error_return({"error": "Failed to complete task"}, 500)
 
 
+@todo.route("/tasks/<int:id>/archive", methods=["PUT"])
+def archive_task(id: int):
+    try:
+        TodoControllers.archive_task(id)
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to archive task"}, 500)
+
+
+@todo.route("/tasks/archive-completed", methods=["PUT"])
+def archive_all_completed():
+    try:
+        TodoControllers.archive_all_completed()
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to archive completed tasks"}, 500)
+
+
 @todo.route("/tasks/<int:id>", methods=["DELETE"])
 def remove_task(id: int):
     try:

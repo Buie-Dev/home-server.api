@@ -137,5 +137,13 @@ class TodoServices:
         return TodoModels.complete_task(id)
 
     @staticmethod
+    def archive_task(id: int):
+        return TodoModels.archive_task(id)
+
+    @staticmethod
+    def archive_all_completed():
+        return TodoModels.archive_all_completed()
+
+    @staticmethod
     def remove_task(id: int):
         return TodoModels.remove_task(id)

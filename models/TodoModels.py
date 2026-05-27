@@ -177,7 +177,7 @@ class TodoModels:
             JOIN todo_templates AS t ON ta.template_id = t.id
             JOIN todo_categories AS c ON t.category_id = c.id
             LEFT JOIN todo_subcategories AS s ON t.subcategory_id = s.id
-            WHERE ta.deleted_at IS NULL AND ta.completed = 0
+            WHERE ta.deleted_at IS NULL AND ta.archived_at IS NULL
         """
         if category_id is not None:
             sql += " AND t.category_id = %s"
@@ -185,7 +185,7 @@ class TodoModels:
         if subcategory_id is not None:
             sql += " AND t.subcategory_id = %s"
             params.append(subcategory_id)
-        sql += " ORDER BY ta.added_at DESC"
+        sql += " ORDER BY ta.completed ASC, ta.added_at DESC"
         return Base.custom_query(sql, params or None)
 
     @staticmethod
@@ -205,7 +205,7 @@ class TodoModels:
             JOIN todo_templates AS t ON ta.template_id = t.id
             JOIN todo_categories AS c ON t.category_id = c.id
             LEFT JOIN todo_subcategories AS s ON t.subcategory_id = s.id
-            WHERE ta.deleted_at IS NULL AND ta.completed = 1
+            WHERE ta.deleted_at IS NULL AND ta.archived_at IS NOT NULL
         """
         if category_id is not None:
             sql += " AND t.category_id = %s"
@@ -236,6 +236,20 @@ class TodoModels:
         return Base.custom_update(
             "UPDATE todo_tasks SET completed = 1, completed_at = NOW() WHERE id = %s",
             (id,),
+        )
+
+    @staticmethod
+    def archive_task(id: int):
+        return Base.custom_update(
+            "UPDATE todo_tasks SET archived_at = NOW() WHERE id = %s",
+            (id,),
+        )
+
+    @staticmethod
+    def archive_all_completed():
+        return Base.custom_update(
+            "UPDATE todo_tasks SET archived_at = NOW() WHERE completed = 1 AND archived_at IS NULL AND deleted_at IS NULL",
+            None,
         )
 
     @staticmethod

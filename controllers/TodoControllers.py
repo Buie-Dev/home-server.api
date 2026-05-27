@@ -69,6 +69,14 @@ class TodoControllers:
         return TodoServices.complete_task(id)
 
     @staticmethod
+    def archive_task(id: int):
+        return TodoServices.archive_task(id)
+
+    @staticmethod
+    def archive_all_completed():
+        return TodoServices.archive_all_completed()
+
+    @staticmethod
     def remove_task(id: int):
         return TodoServices.remove_task(id)
 
