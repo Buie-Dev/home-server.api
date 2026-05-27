@@ -77,6 +77,10 @@ class TodoControllers:
         return TodoServices.archive_all_completed()
 
     @staticmethod
+    def update_task(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int]):
+        return TodoServices.update_task(id, title, notes, category_id, subcategory_id)
+
+    @staticmethod
     def remove_task(id: int):
         return TodoServices.remove_task(id)
 

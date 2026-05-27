@@ -145,5 +145,9 @@ class TodoServices:
         return TodoModels.archive_all_completed()
 
     @staticmethod
+    def update_task(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int]):
+        return TodoModels.update_task(id, title, notes, category_id, subcategory_id)
+
+    @staticmethod
     def remove_task(id: int):
         return TodoModels.remove_task(id)

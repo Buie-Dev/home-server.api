@@ -221,6 +221,23 @@ def archive_all_completed():
         return error_return({"error": "Failed to archive completed tasks"}, 500)
 
 
+@todo.route("/tasks/<int:id>", methods=["PUT"])
+def update_task(id: int):
+    try:
+        data = request.get_json()
+        TodoControllers.update_task(
+            id=id,
+            title=data["title"],
+            notes=data.get("notes"),
+            category_id=data["categoryId"],
+            subcategory_id=data.get("subcategoryId"),
+        )
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to update task"}, 500)
+
+
 @todo.route("/tasks/<int:id>", methods=["DELETE"])
 def remove_task(id: int):
     try:

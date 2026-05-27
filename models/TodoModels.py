@@ -87,7 +87,7 @@ class TodoModels:
             FROM todo_templates AS t
             JOIN todo_categories AS c ON t.category_id = c.id
             LEFT JOIN todo_subcategories AS s ON t.subcategory_id = s.id
-            WHERE t.deleted_at IS NULL AND t.is_direct = 0
+            WHERE t.deleted_at IS NULL
         """
         if category_id is not None:
             sql += " AND t.category_id = %s"
@@ -95,7 +95,7 @@ class TodoModels:
         if subcategory_id is not None:
             sql += " AND t.subcategory_id = %s"
             params.append(subcategory_id)
-        sql += " ORDER BY c.sort_order ASC, c.name ASC, COALESCE(s.sort_order, 999) ASC, s.name ASC, t.title ASC"
+        sql += " ORDER BY t.title ASC"
         return Base.custom_query(sql, params or None)
 
     @staticmethod
@@ -125,21 +125,16 @@ class TodoModels:
     @staticmethod
     def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
         result = Base.custom_insert(
-            "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency, is_direct) VALUES (%s, %s, %s, %s, %s, 0)",
+            "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency) VALUES (%s, %s, %s, %s, %s)",
             (title, notes, category_id, subcategory_id, frequency),
         )
         return {"id": result["inserted_id"]}
 
     @staticmethod
     def add_direct_task(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
-        result = Base.custom_insert(
-            "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency, is_direct) VALUES (%s, %s, %s, %s, %s, 1)",
-            (title, notes, category_id, subcategory_id, frequency),
-        )
-        template_id = result["inserted_id"]
         return Base.custom_insert(
-            "INSERT INTO todo_tasks (template_id) VALUES (%s)",
-            (template_id,),
+            "INSERT INTO todo_tasks (title, notes, frequency, category_id, subcategory_id) VALUES (%s, %s, %s, %s, %s)",
+            (title, notes, frequency, category_id, subcategory_id),
         )
 
     @staticmethod
@@ -166,24 +161,23 @@ class TodoModels:
                 ta.completed,
                 ta.added_at AS addedAt,
                 ta.completed_at AS completedAt,
-                t.title,
-                t.notes,
-                t.frequency,
-                t.category_id AS categoryId,
+                ta.title,
+                ta.notes,
+                ta.frequency,
+                ta.category_id AS categoryId,
                 c.name AS categoryName,
-                t.subcategory_id AS subcategoryId,
+                ta.subcategory_id AS subcategoryId,
                 s.name AS subcategoryName
             FROM todo_tasks AS ta
-            JOIN todo_templates AS t ON ta.template_id = t.id
-            JOIN todo_categories AS c ON t.category_id = c.id
-            LEFT JOIN todo_subcategories AS s ON t.subcategory_id = s.id
+            JOIN todo_categories AS c ON ta.category_id = c.id
+            LEFT JOIN todo_subcategories AS s ON ta.subcategory_id = s.id
             WHERE ta.deleted_at IS NULL AND ta.archived_at IS NULL
         """
         if category_id is not None:
-            sql += " AND t.category_id = %s"
+            sql += " AND ta.category_id = %s"
             params.append(category_id)
         if subcategory_id is not None:
-            sql += " AND t.subcategory_id = %s"
+            sql += " AND ta.subcategory_id = %s"
             params.append(subcategory_id)
         sql += " ORDER BY ta.completed ASC, ta.added_at DESC"
         return Base.custom_query(sql, params or None)
@@ -195,41 +189,51 @@ class TodoModels:
             SELECT
                 ta.id,
                 ta.completed_at AS completedAt,
-                t.title,
-                t.frequency,
-                t.category_id AS categoryId,
+                ta.title,
+                ta.frequency,
+                ta.category_id AS categoryId,
                 c.name AS categoryName,
-                t.subcategory_id AS subcategoryId,
+                ta.subcategory_id AS subcategoryId,
                 s.name AS subcategoryName
             FROM todo_tasks AS ta
-            JOIN todo_templates AS t ON ta.template_id = t.id
-            JOIN todo_categories AS c ON t.category_id = c.id
-            LEFT JOIN todo_subcategories AS s ON t.subcategory_id = s.id
+            JOIN todo_categories AS c ON ta.category_id = c.id
+            LEFT JOIN todo_subcategories AS s ON ta.subcategory_id = s.id
             WHERE ta.deleted_at IS NULL AND ta.archived_at IS NOT NULL
         """
         if category_id is not None:
-            sql += " AND t.category_id = %s"
+            sql += " AND ta.category_id = %s"
             params.append(category_id)
         if subcategory_id is not None:
-            sql += " AND t.subcategory_id = %s"
+            sql += " AND ta.subcategory_id = %s"
             params.append(subcategory_id)
         sql += " ORDER BY ta.completed_at DESC LIMIT 200"
         return Base.custom_query(sql, params or None)
 
     @staticmethod
     def add_task(template_id: int):
-        result = Base.custom_insert(
-            "INSERT INTO todo_tasks (template_id) VALUES (%s)",
+        template = Base.single_query(
+            "SELECT title, notes, frequency, category_id, subcategory_id FROM todo_templates WHERE id = %s",
             (template_id,),
+        )
+        result = Base.custom_insert(
+            "INSERT INTO todo_tasks (template_id, title, notes, frequency, category_id, subcategory_id) VALUES (%s, %s, %s, %s, %s, %s)",
+            (template_id, template["title"], template.get("notes"), template["frequency"], template["category_id"], template.get("subcategory_id")),
         )
         task_id = result["inserted_id"]
         template_checklist = TodoModels.fetch_template_checklist([template_id])
-        for i, item in enumerate(template_checklist):
+        for item in template_checklist:
             Base.custom_insert(
                 "INSERT INTO todo_checklist (task_id, text) VALUES (%s, %s)",
                 (task_id, item["text"]),
             )
         return result
+
+    @staticmethod
+    def update_task(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int]):
+        return Base.custom_update(
+            "UPDATE todo_tasks SET title = %s, notes = %s, category_id = %s, subcategory_id = %s WHERE id = %s",
+            (title, notes, category_id, subcategory_id, id),
+        )
 
     @staticmethod
     def complete_task(id: int):
