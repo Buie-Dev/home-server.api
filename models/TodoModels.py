@@ -79,6 +79,7 @@ class TodoModels:
                 t.title,
                 t.notes,
                 t.frequency,
+                t.month,
                 t.created_at AS createdAt,
                 t.category_id AS categoryId,
                 c.name AS categoryName,
@@ -123,10 +124,10 @@ class TodoModels:
         )
 
     @staticmethod
-    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
+    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, month: Optional[int] = None):
         result = Base.custom_insert(
-            "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency) VALUES (%s, %s, %s, %s, %s)",
-            (title, notes, category_id, subcategory_id, frequency),
+            "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency, month) VALUES (%s, %s, %s, %s, %s, %s)",
+            (title, notes, category_id, subcategory_id, frequency, month),
         )
         return {"id": result["inserted_id"]}
 
@@ -138,10 +139,10 @@ class TodoModels:
         )
 
     @staticmethod
-    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
+    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, month: Optional[int] = None):
         return Base.custom_update(
-            "UPDATE todo_templates SET title = %s, notes = %s, category_id = %s, subcategory_id = %s, frequency = %s WHERE id = %s",
-            (title, notes, category_id, subcategory_id, frequency, id),
+            "UPDATE todo_templates SET title = %s, notes = %s, category_id = %s, subcategory_id = %s, frequency = %s, month = %s WHERE id = %s",
+            (title, notes, category_id, subcategory_id, frequency, month, id),
         )
 
     @staticmethod

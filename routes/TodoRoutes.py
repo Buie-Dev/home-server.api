@@ -115,6 +115,7 @@ def create_template():
             subcategory_id=data.get("subcategoryId"),
             frequency=data["frequency"],
             checklist_items=data.get("checklistItems", []),
+            month=data.get("month"),
         )
         return format_return({"id": result["id"]})
     except Exception:
@@ -134,6 +135,7 @@ def update_template(id: int):
             subcategory_id=data.get("subcategoryId"),
             frequency=data["frequency"],
             checklist_items=data.get("checklistItems", []),
+            month=data.get("month"),
         )
         return format_return({"success": True})
     except Exception:

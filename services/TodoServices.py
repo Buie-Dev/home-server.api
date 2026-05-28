@@ -72,8 +72,8 @@ class TodoServices:
         return templates
 
     @staticmethod
-    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = []):
-        result = TodoModels.create_template(title, notes, category_id, subcategory_id, frequency)
+    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = [], month: Optional[int] = None):
+        result = TodoModels.create_template(title, notes, category_id, subcategory_id, frequency, month)
         template_id = result["id"]
         for i, text in enumerate(checklist_items):
             if text.strip():
@@ -85,8 +85,8 @@ class TodoServices:
         return TodoModels.add_direct_task(title, notes, category_id, subcategory_id, frequency)
 
     @staticmethod
-    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = []):
-        TodoModels.update_template(id, title, notes, category_id, subcategory_id, frequency)
+    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = [], month: Optional[int] = None):
+        TodoModels.update_template(id, title, notes, category_id, subcategory_id, frequency, month)
         TodoModels.delete_template_checklist(id)
         for i, text in enumerate(checklist_items):
             if text.strip():
