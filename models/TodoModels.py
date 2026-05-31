@@ -238,7 +238,7 @@ class TodoModels:
     @staticmethod
     def task_added_today(template_id: int) -> bool:
         row = Base.single_query(
-            "SELECT id FROM todo_tasks WHERE template_id = %s AND deleted_at IS NULL AND DATE(added_at) = CURDATE()",
+            "SELECT id FROM todo_tasks WHERE template_id = %s AND deleted_at IS NULL AND completed = 0",
             (template_id,),
         )
         return row is not None
