@@ -99,10 +99,18 @@ class IrrigationModels:
             WHERE id=%s
         """
         data = (
-            params["name"], params["start_time"], params["duration"],
-            params["monday"], params["tuesday"], params["wednesday"],
-            params["thursday"], params["friday"], params["saturday"], params["sunday"],
-            params["zone_id"], id,
+            params["name"],
+            params["start_time"],
+            params["duration"],
+            params["monday"],
+            params["tuesday"],
+            params["wednesday"],
+            params["thursday"],
+            params["friday"],
+            params["saturday"],
+            params["sunday"],
+            params["zone_id"],
+            id,
         )
         return Base.custom_delete(sql, params=data, connection=connection)
 
@@ -188,7 +196,9 @@ class IrrigationModels:
         return Base.single_query(sql, params=params, connection=connection)
 
     @staticmethod
-    def fetch_automation_schedules(exclude_inactive=False, include_deleted=False) -> List[AutomationSchedule]:
+    def fetch_automation_schedules(
+        exclude_inactive=False, include_deleted=False
+    ) -> List[AutomationSchedule]:
         connection = Base.get_connection()
         conditions = []
         if not include_deleted:
@@ -257,7 +267,14 @@ class IrrigationModels:
         return Base.custom_query(sql, connection=connection)
 
     @staticmethod
-    def fetch_history(limit: int = 100, offset: int = 0, zone_id: int = None, subzone_id: int = None, start_date: str = None, end_date: str = None):
+    def fetch_history(
+        limit: int = 100,
+        offset: int = 0,
+        zone_id: int = None,
+        subzone_id: int = None,
+        start_date: str = None,
+        end_date: str = None,
+    ):
         connection = Base.get_connection()
         params = []
         sql = """
@@ -273,7 +290,7 @@ class IrrigationModels:
             FROM irrigation_history AS h
             LEFT JOIN zones AS z ON h.zone_id = z.zone
             LEFT JOIN zone_types AS zt ON z.zone_type_id = zt.id
-            LEFT JOIN subzones AS sz ON h.subzone_id = sz.subzone
+            LEFT JOIN subzones AS sz ON h.subzone_id = sz.id
             WHERE h.deleted_at IS NULL
         """
         if zone_id is not None:
@@ -297,9 +314,18 @@ class IrrigationModels:
         dc = get_vancouver_date_context()
         connection = Base.get_connection()
         params = [
-            dc['today'], dc['today'], dc['today'],
-            dc['week_ago'], dc['week_ago'], dc['week_ago'],
-            dc['year'], dc['month'], dc['year'], dc['month'], dc['year'], dc['month'],
+            dc["today"],
+            dc["today"],
+            dc["today"],
+            dc["week_ago"],
+            dc["week_ago"],
+            dc["week_ago"],
+            dc["year"],
+            dc["month"],
+            dc["year"],
+            dc["month"],
+            dc["year"],
+            dc["month"],
         ]
         sql = """
             SELECT
@@ -314,7 +340,7 @@ class IrrigationModels:
                 COALESCE(COUNT(CASE WHEN YEAR(h.date) = %s AND MONTH(h.date) = %s THEN 1 END), 0) AS month_runs
             FROM irrigation_history AS h
             LEFT JOIN zones AS z ON h.zone_id = z.zone
-            LEFT JOIN subzones AS sz ON h.subzone_id = sz.subzone
+            LEFT JOIN subzones AS sz ON h.subzone_id = sz.id
             WHERE h.deleted_at IS NULL
         """
         if zone_id is not None:
