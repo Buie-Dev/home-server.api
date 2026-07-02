@@ -52,6 +52,7 @@ class AutomationSchedule(TypedDict):
     start_time: str
     duration: int
     subzone_ids: str
+    sort_order: int
 
 
 class AutomationScheduleFormatted(TypedDict):
@@ -67,6 +68,7 @@ class AutomationScheduleFormatted(TypedDict):
     start_time: str
     duration: int
     subzone_ids: List[int]
+    sort_order: int
 
 
 class AutomationCommand(TypedDict):

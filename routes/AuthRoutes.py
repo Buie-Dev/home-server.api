@@ -1,9 +1,10 @@
 import traceback
 import bcrypt
-from flask import Blueprint, request, jsonify
-from config.config import Config
-from lib.auth import create_token
-from routes.base import error_return
+from flask import Blueprint, g, request, jsonify
+from models.UserModels import UserModels
+from models.PermissionsModels import PermissionsModels
+from lib.auth import create_token, is_internal_request, check_user_auth
+from routes.base import format_return, error_return
 
 auth = Blueprint("auth", __name__)
 
@@ -15,15 +16,55 @@ def login():
         username = data.get("username", "")
         password = data.get("password", "")
 
-        password_matches = bcrypt.checkpw(
-            password.encode("utf-8"),
-            Config.APP_PASSWORD_HASH.encode("utf-8")
-        )
-        if username != Config.APP_USERNAME or not password_matches:
+        user = UserModels.fetch_by_username(username)
+        if not user:
             return error_return({"error": "Invalid credentials"}, 401)
 
-        token = create_token(username)
+        password_matches = bcrypt.checkpw(
+            password.encode("utf-8"),
+            user["password_hash"].encode("utf-8"),
+        )
+        if not password_matches:
+            return error_return({"error": "Invalid credentials"}, 401)
+
+        token = create_token(user["id"], user["username"])
         return jsonify({"token": token})
     except Exception as e:
         traceback.print_exc()
         return error_return({"error": "Login failed"}, 500)
+
+
+@auth.route("/me/permissions", methods=["GET"])
+def get_my_permissions():
+    blocked = check_user_auth()
+    if blocked:
+        return blocked
+    try:
+        pages = PermissionsModels.fetch_user_pages(g.user_id)
+        return format_return({"user_id": g.user_id, "pages": pages})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to fetch permissions"}, 500)
+
+
+@auth.route("/users/<username>/password", methods=["PUT"])
+def update_password(username: str):
+    if not is_internal_request():
+        return error_return({"error": "Forbidden"}, 403)
+
+    try:
+        data = request.get_json()
+        new_password = data.get("new_password", "")
+        if not new_password:
+            return error_return({"error": "new_password is required"}, 400)
+
+        user = UserModels.fetch_by_username(username)
+        if not user:
+            return error_return({"error": "User not found"}, 404)
+
+        new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        UserModels.update_password(username, new_hash)
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to update password"}, 500)

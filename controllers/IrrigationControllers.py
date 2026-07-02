@@ -30,8 +30,9 @@ class IrrigationControllers:
     def update_schedule(id: int, data: CreateScheduleParams):
         IrrigationServices.update_schedule(id, data)
         mqtt.publish_delete_schedule(mqtt_client, id)
-        automation_command = IrrigationServices.fetch_automation_schedule(id)
-        mqtt.publish_add_schedule(mqtt_client, automation_command)
+        if IrrigationServices.is_schedule_active(id):
+            automation_command = IrrigationServices.fetch_automation_schedule(id)
+            mqtt.publish_add_schedule(mqtt_client, automation_command)
 
     @staticmethod
     def delete_schedule(id: int):
@@ -78,6 +79,16 @@ class IrrigationControllers:
         for s in active_schedules:
             mqtt.publish_add_schedule(mqtt_client, s)
         return {"synced": len(active_schedules)}
+
+    @staticmethod
+    def reorder_schedules(ids: List[int]):
+        IrrigationServices.reorder_schedules(ids)
+        for schedule_id in ids:
+            try:
+                automation_command = IrrigationServices.fetch_automation_schedule(schedule_id)
+                mqtt.publish_add_schedule(mqtt_client, automation_command)
+            except Exception as e:
+                print(f"Failed to republish schedule {schedule_id} after reorder: {e}")
 
     @staticmethod
     def fetch_zone_types() -> List[ZoneType]:

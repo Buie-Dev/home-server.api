@@ -9,7 +9,10 @@ from routes.IrrigationRoutes import irrigation
 from routes.AuthRoutes import auth
 from routes.DeviceRoutes import devices
 from routes.MeganRoutes import megan
+from routes.PeopleRoutes import people
+from routes.AdminRoutes import admin
 from routes.TodoRoutes import todo
+from routes.EventRoutes import events
 
 app = Flask(__name__)
 Swagger(app)
@@ -19,7 +22,10 @@ app.register_blueprint(auth, url_prefix="/auth")
 app.register_blueprint(irrigation, url_prefix="/irrigations")
 app.register_blueprint(devices, url_prefix="/devices")
 app.register_blueprint(megan, url_prefix="/megan")
+app.register_blueprint(people, url_prefix="/people")
+app.register_blueprint(admin, url_prefix="/admin")
 app.register_blueprint(todo, url_prefix="/todo")
+app.register_blueprint(events, url_prefix="/events")
 
 
 @app.route("/", methods=["GET"])

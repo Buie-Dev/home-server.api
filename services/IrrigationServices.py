@@ -24,7 +24,7 @@ class IrrigationServices:
                 subzone_ids = [i for i in (ids or []) if i is not None]
             else:
                 subzone_ids = []
-            result.append({**row, "zoneId": row["zone_id"], "subzoneIds": subzone_ids})
+            result.append({**row, "zoneId": row["zone_id"], "subzoneIds": subzone_ids, "sortOrder": row["sort_order"]})
         return result
 
     @staticmethod
@@ -262,6 +262,14 @@ class IrrigationServices:
             diffs.append(f"subzones: db={db_subzones} auto={auto_subzones}")
 
         return diffs
+
+    @staticmethod
+    def reorder_schedules(ids: List[int]):
+        IrrigationModels.reorder_schedules(ids)
+
+    @staticmethod
+    def is_schedule_active(id: int) -> bool:
+        return IrrigationModels.is_schedule_active(id)
 
     @staticmethod
     def toggle_schedule(id: int, data: ToggleScheduleParams):

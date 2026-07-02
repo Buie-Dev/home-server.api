@@ -17,7 +17,7 @@ def create_automation_command(zone, schedule, schedule_id) -> dict:
         "saturday": schedule["saturday"],
         "sunday": schedule["sunday"],
         "command": {
-            "priority": 3,
+            "priority": schedule["sort_order"],
             "duration": schedule["duration"],
             "zone": zone["zone"],
             "subzones": subzones if len(subzones) > 0 else None,

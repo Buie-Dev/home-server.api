@@ -33,7 +33,8 @@ class IrrigationModels:
                 z.name AS zoneName,
                 GROUP_CONCAT(sz.name) AS subzoneNames,
                 JSON_ARRAYAGG(ss.subzone_id) AS subzoneIds,
-                s.active
+                s.active,
+                s.sort_order
             FROM schedules AS s
             LEFT JOIN subzone_schedules AS ss ON s.id = ss.schedule_id
             LEFT JOIN subzones AS sz ON ss.subzone_id = sz.id
@@ -47,7 +48,7 @@ class IrrigationModels:
         if subzone_id is not None:
             sql += " AND EXISTS (SELECT 1 FROM subzone_schedules ss2 WHERE ss2.schedule_id = s.id AND ss2.subzone_id = %s)"
             params.append(subzone_id)
-        sql += " GROUP BY s.id, s.zone_id"
+        sql += " GROUP BY s.id, s.zone_id ORDER BY s.sort_order ASC"
 
         return Base.custom_query(sql, params, connection=connection)
 
@@ -55,8 +56,9 @@ class IrrigationModels:
     def create_schedule(params: CreateScheduleParams):
         connection = Base.get_connection()
         sql = """
-            INSERT INTO schedules (start_time, name, duration, monday, tuesday, wednesday, thursday, friday, saturday, sunday, zone_id) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            INSERT INTO schedules (start_time, name, duration, monday, tuesday, wednesday, thursday, friday, saturday, sunday, zone_id, sort_order)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    (SELECT COALESCE(MAX(s2.sort_order), 0) + 1 FROM schedules s2 WHERE s2.deleted_at IS NULL))"""
 
         data = (
             params["start_time"],
@@ -175,9 +177,9 @@ class IrrigationModels:
         connection = Base.get_connection()
         params = [id]
         sql = """
-            SELECT 
-                s.id, 
-                zone_id, 
+            SELECT
+                s.id,
+                zone_id,
                 monday,
                 tuesday,
                 wednesday,
@@ -185,8 +187,9 @@ class IrrigationModels:
                 friday,
                 saturday,
                 sunday,
-                TIME_FORMAT(start_time, '%%H:%%i') AS start_time, 
+                TIME_FORMAT(start_time, '%%H:%%i') AS start_time,
                 duration,
+                sort_order,
                 JSON_ARRAYAGG(ss.subzone_id) AS subzone_ids
             FROM schedules AS s
             LEFT JOIN subzone_schedules AS ss ON s.id = ss.schedule_id
@@ -219,11 +222,13 @@ class IrrigationModels:
                 sunday,
                 TIME_FORMAT(start_time, '%H:%i') AS start_time,
                 duration,
+                sort_order,
                 JSON_ARRAYAGG(ss.subzone_id) AS subzone_ids
             FROM schedules AS s
             LEFT JOIN subzone_schedules AS ss ON s.id = ss.schedule_id
             {where_clause}
             GROUP BY s.id, s.zone_id
+            ORDER BY s.sort_order ASC
             """
         return Base.custom_query(sql, connection=connection)
 
@@ -243,13 +248,38 @@ class IrrigationModels:
                 sunday,
                 TIME_FORMAT(start_time, '%H:%i') AS start_time,
                 duration,
+                sort_order,
                 JSON_ARRAYAGG(ss.subzone_id) AS subzone_ids
             FROM schedules AS s
             LEFT JOIN subzone_schedules AS ss ON s.id = ss.schedule_id
             WHERE deleted_at IS NULL AND active = 1
             GROUP BY s.id, s.zone_id
+            ORDER BY s.sort_order ASC
             """
         return Base.custom_query(sql, connection=connection)
+
+    @staticmethod
+    def reorder_schedules(ids: List[int]):
+        connection = Base.get_connection()
+        when_clauses = " ".join(["WHEN %s THEN %s"] * len(ids))
+        id_placeholders = ", ".join(["%s"] * len(ids))
+        sql = f"""
+            UPDATE schedules
+            SET sort_order = CASE id {when_clauses} END
+            WHERE id IN ({id_placeholders})
+        """
+        params = []
+        for i, schedule_id in enumerate(ids):
+            params.extend([schedule_id, i + 1])
+        params.extend(ids)
+        return Base.custom_update(sql, params=params, connection=connection)
+
+    @staticmethod
+    def is_schedule_active(id: int) -> bool:
+        connection = Base.get_connection()
+        sql = "SELECT active FROM schedules WHERE id = %s AND deleted_at IS NULL"
+        row = Base.single_query(sql, params=[id], connection=connection)
+        return bool(row and row.get("active"))
 
     @staticmethod
     def toggle_schedule(id: int, data: ToggleScheduleParams):

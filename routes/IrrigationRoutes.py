@@ -80,6 +80,19 @@ def update_schedule(id: int) -> Any:
         return error_return({"error": "Failed to update schedule"}, 500)
 
 
+@irrigation.route("/schedules/reorder", methods=["PUT"])
+def reorder_schedules() -> Any:
+    try:
+        data = request.get_json()
+        ids = data["ids"]
+        IrrigationControllers.reorder_schedules(ids)
+        return format_return({"Success": True})
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error reordering schedules: {e}")
+        return error_return({"error": "Failed to reorder schedules"}, 500)
+
+
 @irrigation.route("/schedules/<int:id>/toggle", methods=["POST"])
 def toggle_schedule(id: int) -> Any:
     try:
