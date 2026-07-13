@@ -13,6 +13,7 @@ from routes.PeopleRoutes import people
 from routes.AdminRoutes import admin
 from routes.TodoRoutes import todo
 from routes.EventRoutes import events
+from routes.RowingRoutes import rowing
 
 app = Flask(__name__)
 Swagger(app)
@@ -26,6 +27,7 @@ app.register_blueprint(people, url_prefix="/people")
 app.register_blueprint(admin, url_prefix="/admin")
 app.register_blueprint(todo, url_prefix="/todo")
 app.register_blueprint(events, url_prefix="/events")
+app.register_blueprint(rowing, url_prefix="/rowing")
 
 
 @app.route("/", methods=["GET"])

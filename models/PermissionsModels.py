@@ -1,6 +1,6 @@
 from models.Base import Base
 
-PAGES = ['irrigation', 'people', 'todo', 'events', 'devices', 'admin']
+PAGES = ['irrigation', 'rowing', 'people', 'todo', 'events', 'devices', 'admin']
 
 
 class PermissionsModels:
@@ -8,7 +8,7 @@ class PermissionsModels:
     @staticmethod
     def fetch_user_pages(user_id: int) -> list:
         row = Base.single_query(
-            "SELECT irrigation, people, todo, events, devices, admin FROM user_permissions WHERE user_id = %s",
+            "SELECT irrigation, rowing, people, todo, events, devices, admin FROM user_permissions WHERE user_id = %s",
             (user_id,),
         )
         if not row:
@@ -21,7 +21,7 @@ class PermissionsModels:
         result = []
         for user in users:
             row = Base.single_query(
-                "SELECT irrigation, people, todo, events, devices, admin FROM user_permissions WHERE user_id = %s",
+                "SELECT irrigation, rowing, people, todo, events, devices, admin FROM user_permissions WHERE user_id = %s",
                 (user["id"],),
             )
             perms = {page: bool(row.get(page, False)) for page in PAGES} if row else {page: False for page in PAGES}
@@ -37,13 +37,13 @@ class PermissionsModels:
         if existing:
             Base.custom_update(
                 """UPDATE user_permissions
-                   SET irrigation=%s, people=%s, todo=%s, events=%s, devices=%s, admin=%s
+                   SET irrigation=%s, rowing=%s, people=%s, todo=%s, events=%s, devices=%s, admin=%s
                    WHERE user_id=%s""",
                 (*vals, user_id),
             )
         else:
             Base.custom_insert(
-                """INSERT INTO user_permissions (user_id, irrigation, people, todo, events, devices, admin)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+                """INSERT INTO user_permissions (user_id, irrigation, rowing, people, todo, events, devices, admin)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
                 (user_id, *vals),
             )
