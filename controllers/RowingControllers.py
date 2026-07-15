@@ -81,8 +81,8 @@ class RowingControllers:
     # ── Races ──────────────────────────────────────────────────────────────
 
     @staticmethod
-    def fetch_races():
-        return RowingServices.fetch_races()
+    def fetch_races(date: str):
+        return RowingServices.fetch_races(date)
 
     @staticmethod
     def fetch_race(id: int):

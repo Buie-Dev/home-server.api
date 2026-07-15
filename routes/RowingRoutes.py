@@ -217,7 +217,10 @@ def delete_crew(id: int):
 @rowing.route("/races", methods=["GET"])
 def fetch_races():
     try:
-        return format_return(RowingControllers.fetch_races())
+        date = request.args.get("date")
+        if not date:
+            return error_return({"error": "date param is required (YYYY-MM-DD)"}, 400)
+        return format_return(RowingControllers.fetch_races(date))
     except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to fetch races"}, 500)

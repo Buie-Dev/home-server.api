@@ -205,16 +205,17 @@ class RowingModels:
     # ── Races ──────────────────────────────────────────────────────────────
 
     @staticmethod
-    def fetch_races():
+    def fetch_races(date: str):
         return Base.custom_query(
             """
             SELECT id, distance, race_type AS raceType, event_type AS eventType,
                    wind_conditions AS windConditions, notes, status,
                    created_at AS createdAt, completed_at AS completedAt
             FROM rowing_races
-            WHERE deleted_at IS NULL
+            WHERE deleted_at IS NULL AND DATE(created_at) = %s
             ORDER BY created_at DESC
-            """
+            """,
+            (date,),
         )
 
     @staticmethod

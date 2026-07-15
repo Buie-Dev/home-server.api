@@ -124,13 +124,13 @@ class RowingServices:
     # ── Races ──────────────────────────────────────────────────────────────
 
     @staticmethod
-    def fetch_races():
+    def fetch_races(date: str):
         return [
             {
                 **RowingServices._format_race(race),
                 "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(race["id"])),
             }
-            for race in RowingModels.fetch_races()
+            for race in RowingModels.fetch_races(date)
         ]
 
     @staticmethod
