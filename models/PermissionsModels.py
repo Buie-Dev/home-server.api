@@ -17,7 +17,7 @@ class PermissionsModels:
 
     @staticmethod
     def fetch_all_users_with_permissions() -> list:
-        users = Base.custom_query("SELECT id, username FROM users ORDER BY username ASC")
+        users = Base.custom_query("SELECT id, username FROM users WHERE deleted_at IS NULL ORDER BY username ASC")
         result = []
         for user in users:
             row = Base.single_query(

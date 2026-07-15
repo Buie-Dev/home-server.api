@@ -4,6 +4,12 @@ from typing import List, Optional
 
 class RowingControllers:
 
+    # ── Boat Classes ───────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_boat_classes():
+        return RowingServices.fetch_boat_classes()
+
     # ── Crew Members ───────────────────────────────────────────────────────
 
     @staticmethod
@@ -11,12 +17,12 @@ class RowingControllers:
         return RowingServices.fetch_crew_members()
 
     @staticmethod
-    def create_crew_member(name: str):
-        return RowingServices.create_crew_member(name)
+    def create_crew_member(name: str, gender: str):
+        return RowingServices.create_crew_member(name, gender)
 
     @staticmethod
-    def update_crew_member(id: int, name: str):
-        return RowingServices.update_crew_member(id, name)
+    def update_crew_member(id: int, name: str, gender: str):
+        return RowingServices.update_crew_member(id, name, gender)
 
     @staticmethod
     def delete_crew_member(id: int):
@@ -29,16 +35,48 @@ class RowingControllers:
         return RowingServices.fetch_boats()
 
     @staticmethod
-    def create_boat(name: str, crew_member_ids: List[int]):
-        return RowingServices.create_boat(name, crew_member_ids)
+    def create_boat(name: str, boat_class_id: Optional[int]):
+        return RowingServices.create_boat(name, boat_class_id)
 
     @staticmethod
-    def update_boat(id: int, name: str, crew_member_ids: List[int]):
-        return RowingServices.update_boat(id, name, crew_member_ids)
+    def update_boat(id: int, name: str, boat_class_id: Optional[int]):
+        return RowingServices.update_boat(id, name, boat_class_id)
 
     @staticmethod
     def delete_boat(id: int):
         return RowingServices.delete_boat(id)
+
+    # ── Crews ──────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_crews():
+        return RowingServices.fetch_crews()
+
+    @staticmethod
+    def create_crew(boat_id: int, gender: str, age_category: str,
+                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        return RowingServices.create_crew(boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+
+    @staticmethod
+    def update_crew(crew_id: int, boat_id: int, gender: str, age_category: str,
+                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        return RowingServices.update_crew(crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+
+    @staticmethod
+    def update_crew_lineup(crew_id: int, boat_id: int, gender: str, age_category: str,
+                           cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                           seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                           seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        return RowingServices.update_crew_lineup(crew_id, boat_id, gender, age_category, cox,
+                                                 seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+
+    @staticmethod
+    def delete_crew(crew_id: int):
+        return RowingServices.delete_crew(crew_id)
 
     # ── Races ──────────────────────────────────────────────────────────────
 
@@ -51,8 +89,9 @@ class RowingControllers:
         return RowingServices.fetch_race(id)
 
     @staticmethod
-    def create_race(distance: str, race_type: str, boat_ids: List[int], wind_conditions: Optional[str], notes: Optional[str]):
-        return RowingServices.create_race(distance, race_type, boat_ids, wind_conditions, notes)
+    def create_race(distance: str, race_type: str, crew_ids: List[int], event_type: Optional[str],
+                    wind_conditions: Optional[str], notes: Optional[str]):
+        return RowingServices.create_race(distance, race_type, crew_ids, event_type, wind_conditions, notes)
 
     @staticmethod
     def activate_race(id: int):
@@ -83,6 +122,10 @@ class RowingControllers:
     @staticmethod
     def mark_dnf(entry_id: int):
         return RowingServices.mark_dnf(entry_id)
+
+    @staticmethod
+    def reassign_entry_crew(entry_id: int, crew_id: int):
+        return RowingServices.reassign_entry_crew(entry_id, crew_id)
 
     @staticmethod
     def delete_entry(entry_id: int):

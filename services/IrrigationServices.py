@@ -248,6 +248,11 @@ class IrrigationServices:
         db_cmd = db_s.get("command", {})
         auto_cmd = auto_s.get("command", {})
 
+        if db_s.get("sort_order") != auto_cmd.get("priority"):
+            diffs.append(
+                f"priority: db={db_s.get('sort_order')} auto={auto_cmd.get('priority')}"
+            )
+
         if db_cmd.get("duration") != auto_cmd.get("duration"):
             diffs.append(
                 f"duration: db={db_cmd.get('duration')} auto={auto_cmd.get('duration')}"

@@ -6,21 +6,28 @@ class UserModels:
     @staticmethod
     def fetch_by_username(username: str):
         return Base.single_query(
-            "SELECT id, username, password_hash FROM users WHERE username = %s",
+            "SELECT id, username, password_hash FROM users WHERE username = %s AND deleted_at IS NULL",
             (username,),
         )
 
     @staticmethod
     def fetch_by_id(user_id: int):
         return Base.single_query(
-            "SELECT id, username FROM users WHERE id = %s",
+            "SELECT id, username FROM users WHERE id = %s AND deleted_at IS NULL",
             (user_id,),
         )
 
     @staticmethod
     def fetch_by_username_or_id(user_id: int):
         return Base.single_query(
-            "SELECT id, username FROM users WHERE id = %s",
+            "SELECT id, username FROM users WHERE id = %s AND deleted_at IS NULL",
+            (user_id,),
+        )
+
+    @staticmethod
+    def soft_delete_user(user_id: int):
+        return Base.custom_update(
+            "UPDATE users SET deleted_at = NOW(), username = CONCAT(username, '__deleted__', id) WHERE id = %s AND deleted_at IS NULL",
             (user_id,),
         )
 

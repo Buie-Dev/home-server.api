@@ -8,6 +8,17 @@ rowing = Blueprint("rowing", __name__)
 rowing.before_request(check_auth)
 
 
+# ── Boat Classes ───────────────────────────────────────────────────────────────
+
+@rowing.route("/boat-classes", methods=["GET"])
+def fetch_boat_classes():
+    try:
+        return format_return(RowingControllers.fetch_boat_classes())
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to fetch boat classes"}, 500)
+
+
 # ── Crew Members ───────────────────────────────────────────────────────────────
 
 @rowing.route("/crew", methods=["GET"])
@@ -23,7 +34,7 @@ def fetch_crew_members():
 def create_crew_member():
     try:
         data = request.get_json()
-        crew_id = RowingControllers.create_crew_member(data["name"])
+        crew_id = RowingControllers.create_crew_member(data["name"], data["gender"])
         return format_return({"id": crew_id})
     except Exception:
         traceback.print_exc()
@@ -34,7 +45,7 @@ def create_crew_member():
 def update_crew_member(id: int):
     try:
         data = request.get_json()
-        RowingControllers.update_crew_member(id, data["name"])
+        RowingControllers.update_crew_member(id, data["name"], data["gender"])
         return format_return({"success": True})
     except Exception:
         traceback.print_exc()
@@ -68,7 +79,7 @@ def fetch_boats():
 def create_boat():
     try:
         data = request.get_json()
-        boat_id = RowingControllers.create_boat(data["name"], data["crewMemberIds"])
+        boat_id = RowingControllers.create_boat(data["name"], data.get("boatClassId"))
         return format_return({"id": boat_id})
     except ValueError as e:
         return error_return({"error": str(e)}, 400)
@@ -81,7 +92,7 @@ def create_boat():
 def update_boat(id: int):
     try:
         data = request.get_json()
-        RowingControllers.update_boat(id, data["name"], data["crewMemberIds"])
+        RowingControllers.update_boat(id, data["name"], data.get("boatClassId"))
         return format_return({"success": True})
     except ValueError as e:
         return error_return({"error": str(e)}, 400)
@@ -98,6 +109,107 @@ def delete_boat(id: int):
     except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to delete boat"}, 500)
+
+
+# ── Crews ──────────────────────────────────────────────────────────────────────
+
+@rowing.route("/crews", methods=["GET"])
+def fetch_crews():
+    try:
+        return format_return(RowingControllers.fetch_crews())
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to fetch crews"}, 500)
+
+
+@rowing.route("/crews", methods=["POST"])
+def create_crew():
+    try:
+        data = request.get_json()
+        crew_id = RowingControllers.create_crew(
+            data["boatId"],
+            data["gender"],
+            data["ageCategory"],
+            data.get("cox"),
+            data.get("seat1"),
+            data.get("seat2"),
+            data.get("seat3"),
+            data.get("seat4"),
+            data.get("seat5"),
+            data.get("seat6"),
+            data.get("seat7"),
+            data.get("seat8"),
+        )
+        return format_return({"id": crew_id})
+    except ValueError as e:
+        return error_return({"error": str(e)}, 400)
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to create crew"}, 500)
+
+
+@rowing.route("/crews/<int:id>", methods=["PUT"])
+def update_crew(id: int):
+    try:
+        data = request.get_json()
+        result = RowingControllers.update_crew(
+            id,
+            data["boatId"],
+            data["gender"],
+            data["ageCategory"],
+            data.get("cox"),
+            data.get("seat1"),
+            data.get("seat2"),
+            data.get("seat3"),
+            data.get("seat4"),
+            data.get("seat5"),
+            data.get("seat6"),
+            data.get("seat7"),
+            data.get("seat8"),
+        )
+        return format_return(result)
+    except ValueError as e:
+        return error_return({"error": str(e)}, 400)
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to update crew"}, 500)
+
+
+@rowing.route("/crews/<int:id>/lineup", methods=["PUT"])
+def update_crew_lineup(id: int):
+    try:
+        data = request.get_json()
+        RowingControllers.update_crew_lineup(
+            id,
+            data["boatId"],
+            data["gender"],
+            data["ageCategory"],
+            data.get("cox"),
+            data.get("seat1"),
+            data.get("seat2"),
+            data.get("seat3"),
+            data.get("seat4"),
+            data.get("seat5"),
+            data.get("seat6"),
+            data.get("seat7"),
+            data.get("seat8"),
+        )
+        return format_return({"success": True})
+    except ValueError as e:
+        return error_return({"error": str(e)}, 400)
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to update crew lineup"}, 500)
+
+
+@rowing.route("/crews/<int:id>", methods=["DELETE"])
+def delete_crew(id: int):
+    try:
+        RowingControllers.delete_crew(id)
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to delete crew"}, 500)
 
 
 # ── Races ──────────────────────────────────────────────────────────────────────
@@ -130,7 +242,8 @@ def create_race():
         race_id = RowingControllers.create_race(
             distance=data["distance"],
             race_type=data["raceType"],
-            boat_ids=data["boatIds"],
+            crew_ids=data["crewIds"],
+            event_type=data.get("eventType"),
             wind_conditions=data.get("windConditions"),
             notes=data.get("notes"),
         )
@@ -214,6 +327,17 @@ def mark_dnf(entry_id: int):
     except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to mark DNF"}, 500)
+
+
+@rowing.route("/entries/<int:entry_id>/crew", methods=["PUT"])
+def update_entry_crew(entry_id: int):
+    try:
+        data = request.get_json()
+        RowingControllers.reassign_entry_crew(entry_id, data["crewId"])
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to reassign crew"}, 500)
 
 
 @rowing.route("/entries/<int:entry_id>", methods=["DELETE"])

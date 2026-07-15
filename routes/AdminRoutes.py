@@ -56,6 +56,24 @@ def create_user():
         return error_return({"error": "Failed to create user"}, 500)
 
 
+@admin.route("/users/<int:user_id>", methods=["DELETE"])
+def delete_user(user_id: int):
+    blocked = _require_admin()
+    if blocked:
+        return blocked
+    try:
+        if not is_internal_request() and g.user_id == user_id:
+            return error_return({"error": "Cannot delete yourself"}, 403)
+        user = UserModels.fetch_by_id(user_id)
+        if not user:
+            return error_return({"error": "User not found"}, 404)
+        UserModels.soft_delete_user(user_id)
+        return format_return({"success": True})
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to delete user"}, 500)
+
+
 @admin.route("/users/<int:user_id>/permissions", methods=["PUT"])
 def set_permissions(user_id: int):
     blocked = _require_admin()

@@ -1,12 +1,22 @@
 from models.RowingModels import RowingModels
 from typing import List, Optional
-import json
-
-MAX_CREW = 9
-MIN_CREW = 1
 
 
 class RowingServices:
+
+    # ── Boat Classes ───────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_boat_classes():
+        return [
+            {
+                "id": c["id"],
+                "symbol": c["symbol"],
+                "crewCount": c["crewCount"],
+                "hasCox": bool(c["hasCox"]),
+            }
+            for c in RowingModels.fetch_boat_classes()
+        ]
 
     # ── Crew Members ───────────────────────────────────────────────────────
 
@@ -15,124 +25,134 @@ class RowingServices:
         return RowingModels.fetch_crew_members()
 
     @staticmethod
-    def create_crew_member(name: str):
-        result = RowingModels.create_crew_member(name)
-        return result["inserted_id"]
+    def create_crew_member(name: str, gender: str):
+        return RowingModels.create_crew_member(name, gender)["inserted_id"]
 
     @staticmethod
-    def update_crew_member(id: int, name: str):
-        RowingModels.update_crew_member(id, name)
+    def update_crew_member(id: int, name: str, gender: str):
+        RowingModels.update_crew_member(id, name, gender)
 
     @staticmethod
     def delete_crew_member(id: int):
-        count = RowingModels.count_boats_for_crew_member(id)
+        count = RowingModels.count_crews_for_crew_member(id)
         if count > 0:
-            raise ValueError(f"Crew member is assigned to {count} boat(s) and cannot be deleted")
+            raise ValueError(f"This rower is assigned to {count} crew(s) — remove them from crews first")
         RowingModels.delete_crew_member(id)
 
     # ── Boats ──────────────────────────────────────────────────────────────
 
     @staticmethod
     def fetch_boats():
-        boats = RowingModels.fetch_boats()
-        result = []
-        for boat in boats:
-            crew = RowingModels.fetch_boat_crew(boat["id"])
-            result.append({
-                "id": boat["id"],
-                "name": boat["name"],
-                "createdAt": str(boat["createdAt"]),
-                "crew": [
-                    {
-                        "id": c["id"],
-                        "crewMemberId": c["crewMemberId"],
-                        "crewMemberName": c["crewMemberName"],
-                        "seatPosition": c["seatPosition"],
-                    }
-                    for c in crew
-                ],
-            })
-        return result
+        return [RowingServices._format_boat(b) for b in RowingModels.fetch_boats()]
 
     @staticmethod
-    def create_boat(name: str, crew_member_ids: List[int]):
-        if len(crew_member_ids) < MIN_CREW:
-            raise ValueError(f"A boat must have at least {MIN_CREW} crew member")
-        if len(crew_member_ids) > MAX_CREW:
-            raise ValueError(f"A boat cannot have more than {MAX_CREW} crew members")
-
-        result = RowingModels.create_boat(name)
-        boat_id = result["inserted_id"]
-        for i, crew_member_id in enumerate(crew_member_ids, start=1):
-            RowingModels.add_crew_to_boat(boat_id, crew_member_id, i)
-        return boat_id
+    def create_boat(name: str, boat_class_id: Optional[int]):
+        if not name.strip():
+            raise ValueError("Boat name is required")
+        return RowingModels.create_boat(name, boat_class_id)["inserted_id"]
 
     @staticmethod
-    def update_boat(id: int, name: str, crew_member_ids: List[int]):
-        if len(crew_member_ids) < MIN_CREW:
-            raise ValueError(f"A boat must have at least {MIN_CREW} crew member")
-        if len(crew_member_ids) > MAX_CREW:
-            raise ValueError(f"A boat cannot have more than {MAX_CREW} crew members")
-
-        RowingModels.update_boat_name(id, name)
-        RowingModels.clear_boat_crew(id)
-        for i, crew_member_id in enumerate(crew_member_ids, start=1):
-            RowingModels.add_crew_to_boat(id, crew_member_id, i)
+    def update_boat(id: int, name: str, boat_class_id: Optional[int]):
+        if not name.strip():
+            raise ValueError("Boat name is required")
+        RowingModels.update_boat(id, name, boat_class_id)
 
     @staticmethod
     def delete_boat(id: int):
         RowingModels.delete_boat(id)
 
+    # ── Crews ──────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_crews():
+        return [
+            {
+                **RowingServices._format_crew(r),
+                "hasResults": RowingModels.crew_has_results(r["id"]),
+            }
+            for r in RowingModels.fetch_crews()
+        ]
+
+    @staticmethod
+    def create_crew(boat_id: int, gender: str, age_category: str,
+                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+        return RowingModels.create_crew(
+            boat_id, gender, age_category, cox,
+            seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )["inserted_id"]
+
+    @staticmethod
+    def update_crew(crew_id: int, boat_id: int, gender: str, age_category: str,
+                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+        if RowingModels.crew_has_results(crew_id):
+            if not RowingModels.fetch_crew(crew_id):
+                raise ValueError("Crew not found")
+            new_id = RowingModels.create_crew(
+                boat_id, gender, age_category, cox,
+                seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+            )["inserted_id"]
+            return {"id": new_id, "copied": True}
+        else:
+            RowingModels.update_crew(
+                crew_id, boat_id, gender, age_category, cox,
+                seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+            )
+            return {"id": crew_id, "copied": False}
+
+    @staticmethod
+    def update_crew_lineup(crew_id: int, boat_id: int, gender: str, age_category: str,
+                           cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
+                           seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
+                           seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+        """Always edits in place — used from the race results screen to correct who raced."""
+        RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+        if not RowingModels.fetch_crew(crew_id):
+            raise ValueError("Crew not found")
+        RowingModels.update_crew(crew_id, boat_id, gender, age_category, cox,
+                                 seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+
+    @staticmethod
+    def delete_crew(crew_id: int):
+        RowingModels.delete_crew(crew_id)
+
     # ── Races ──────────────────────────────────────────────────────────────
 
     @staticmethod
     def fetch_races():
-        races = RowingModels.fetch_races()
-        result = []
-        for race in races:
-            entries = RowingModels.fetch_entries_for_race(race["id"])
-            result.append({
-                "id": race["id"],
-                "distance": race["distance"],
-                "raceType": race["raceType"],
-                "windConditions": race["windConditions"],
-                "notes": race["notes"],
-                "status": race["status"],
-                "createdAt": str(race["createdAt"]),
-                "completedAt": str(race["completedAt"]) if race["completedAt"] else None,
-                "entries": RowingServices._format_entries(entries),
-            })
-        return result
+        return [
+            {
+                **RowingServices._format_race(race),
+                "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(race["id"])),
+            }
+            for race in RowingModels.fetch_races()
+        ]
 
     @staticmethod
     def fetch_race(id: int):
         race = RowingModels.fetch_race(id)
         if not race:
             return None
-        entries = RowingModels.fetch_entries_for_race(id)
         return {
-            "id": race["id"],
-            "distance": race["distance"],
-            "raceType": race["raceType"],
-            "windConditions": race["windConditions"],
-            "notes": race["notes"],
-            "status": race["status"],
-            "createdAt": str(race["createdAt"]),
-            "completedAt": str(race["completedAt"]) if race["completedAt"] else None,
-            "entries": RowingServices._format_entries(entries),
+            **RowingServices._format_race(race),
+            "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(id)),
         }
 
     @staticmethod
-    def create_race(distance: str, race_type: str, boat_ids: List[int], wind_conditions: Optional[str], notes: Optional[str]):
+    def create_race(distance: str, race_type: str, crew_ids: List[int], event_type: Optional[str],
+                    wind_conditions: Optional[str], notes: Optional[str]):
         if race_type not in ("time_trial", "side_by_side"):
             raise ValueError("race_type must be 'time_trial' or 'side_by_side'")
-        if not boat_ids:
-            raise ValueError("At least one boat is required")
-
-        result = RowingModels.create_race(distance, race_type, wind_conditions, notes)
-        race_id = result["inserted_id"]
-        for boat_id in boat_ids:
-            RowingModels.create_entry(race_id, boat_id)
+        if not crew_ids:
+            raise ValueError("At least one crew is required")
+        race_id = RowingModels.create_race(distance, race_type, event_type, wind_conditions, notes)["inserted_id"]
+        for crew_id in crew_ids:
+            RowingModels.create_entry(race_id, crew_id)
         return race_id
 
     @staticmethod
@@ -167,25 +187,112 @@ class RowingServices:
         RowingModels.mark_entry_dnf(entry_id)
 
     @staticmethod
+    def reassign_entry_crew(entry_id: int, crew_id: int):
+        RowingModels.update_entry_crew(entry_id, crew_id)
+
+    @staticmethod
     def delete_entry(entry_id: int):
         RowingModels.delete_entry(entry_id)
 
     # ── Helpers ────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _format_entries(entries):
-        return [
-            {
+    def _validate_crew_seats(*member_ids):
+        filled = [mid for mid in member_ids if mid is not None]
+        if len(filled) != len(set(filled)):
+            raise ValueError("Each rower can only occupy one seat")
+
+    @staticmethod
+    def _crew_class_name(gender: str, age_category: str, symbol: str) -> str:
+        if gender == "Mixed":
+            return f"Mixed {age_category} {symbol}"
+        return f"{gender}'s {age_category} {symbol}"
+
+    @staticmethod
+    def _format_boat(b: dict) -> dict:
+        has_cox = b.get("boatClassHasCox")
+        return {
+            "id": b["id"],
+            "name": b["name"],
+            "boatClassId": b.get("boatClassId"),
+            "boatClassSymbol": b.get("boatClassSymbol"),
+            "boatClassCrewCount": b.get("boatClassCrewCount"),
+            "boatClassHasCox": bool(has_cox) if has_cox is not None else False,
+            "createdAt": str(b["createdAt"]),
+        }
+
+    @staticmethod
+    def _format_crew(r: dict) -> dict:
+        def slot(mid, name, gender):
+            if mid is None:
+                return None
+            return {"crewMemberId": mid, "name": name or "", "gender": gender or ""}
+
+        symbol = r.get("boatClassSymbol")
+        gender = r.get("gender")
+        age_cat = r.get("ageCategory")
+        has_cox = r.get("boatClassHasCox")
+        crew_class_name = RowingServices._crew_class_name(gender, age_cat, symbol) if symbol and gender and age_cat else symbol
+
+        return {
+            "id": r["id"],
+            "boatId": r["boatId"],
+            "boatName": r["boatName"],
+            "boatClassId": r.get("boatClassId"),
+            "boatClassSymbol": symbol,
+            "boatClassCrewCount": r.get("boatClassCrewCount"),
+            "boatClassHasCox": bool(has_cox) if has_cox is not None else False,
+            "gender": gender,
+            "ageCategory": age_cat,
+            "crewClassName": crew_class_name,
+            "cox": slot(r.get("cox"), r.get("coxName"), r.get("coxGender")),
+            "seat1": slot(r.get("seat_1"), r.get("seat1Name"), r.get("seat1Gender")),
+            "seat2": slot(r.get("seat_2"), r.get("seat2Name"), r.get("seat2Gender")),
+            "seat3": slot(r.get("seat_3"), r.get("seat3Name"), r.get("seat3Gender")),
+            "seat4": slot(r.get("seat_4"), r.get("seat4Name"), r.get("seat4Gender")),
+            "seat5": slot(r.get("seat_5"), r.get("seat5Name"), r.get("seat5Gender")),
+            "seat6": slot(r.get("seat_6"), r.get("seat6Name"), r.get("seat6Gender")),
+            "seat7": slot(r.get("seat_7"), r.get("seat7Name"), r.get("seat7Gender")),
+            "seat8": slot(r.get("seat_8"), r.get("seat8Name"), r.get("seat8Gender")),
+            "createdAt": str(r["createdAt"]),
+        }
+
+    @staticmethod
+    def _format_race(race: dict) -> dict:
+        return {
+            "id": race["id"],
+            "distance": race["distance"],
+            "raceType": race["raceType"],
+            "eventType": race["eventType"],
+            "windConditions": race["windConditions"],
+            "notes": race["notes"],
+            "status": race["status"],
+            "createdAt": str(race["createdAt"]),
+            "completedAt": str(race["completedAt"]) if race["completedAt"] else None,
+        }
+
+    @staticmethod
+    def _format_entries(entries: list) -> list:
+        result = []
+        for e in entries:
+            has_cox = bool(e.get("boatHasCox"))
+            cox_name = e.get("coxName")
+            stroke_name = e.get("strokeName")
+            # coxie shown if the boat has a cox; stroke shown otherwise
+            key_person = cox_name if has_cox else stroke_name
+            result.append({
                 "id": e["id"],
                 "raceId": e["raceId"],
-                "boatId": e["boatId"],
-                "boatName": e["boatName"],
+                "crewId": e.get("crewId"),
+                "boatName": e.get("boatName") or "Unknown",
+                "coxName": cox_name,
+                "strokeName": stroke_name,
+                "keyPerson": key_person,
                 "startTime": e["startTime"],
                 "finishTime": e["finishTime"],
                 "elapsedMs": e["elapsedMs"],
                 "dns": bool(e["dns"]),
                 "dnf": bool(e["dnf"]),
                 "placement": e["placement"],
-            }
-            for e in entries
-        ]
+            })
+        return result
