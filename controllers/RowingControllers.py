@@ -130,3 +130,9 @@ class RowingControllers:
     @staticmethod
     def delete_entry(entry_id: int):
         return RowingServices.delete_entry(entry_id)
+
+    # ── World Best Times ───────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_world_best_times():
+        return RowingServices.fetch_world_best_times()

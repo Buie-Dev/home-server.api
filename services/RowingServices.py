@@ -128,7 +128,7 @@ class RowingServices:
         return [
             {
                 **RowingServices._format_race(race),
-                "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(race["id"])),
+                "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(race["id"]), race["distance"]),
             }
             for race in RowingModels.fetch_races(date)
         ]
@@ -140,7 +140,7 @@ class RowingServices:
             return None
         return {
             **RowingServices._format_race(race),
-            "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(id)),
+            "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(id), race["distance"]),
         }
 
     @staticmethod
@@ -272,7 +272,8 @@ class RowingServices:
         }
 
     @staticmethod
-    def _format_entries(entries: list) -> list:
+    def _format_entries(entries: list, race_distance: str) -> list:
+        dist = int(race_distance)
         result = []
         for e in entries:
             has_cox = bool(e.get("boatHasCox"))
@@ -280,6 +281,14 @@ class RowingServices:
             stroke_name = e.get("strokeName")
             # coxie shown if the boat has a cox; stroke shown otherwise
             key_person = cox_name if has_cox else stroke_name
+            elapsed_ms = e["elapsedMs"]
+            wbt_time_ms = e.get("wbtTimeMs")
+            if elapsed_ms is not None and wbt_time_ms is not None:
+                wbt_pct = round((dist * wbt_time_ms) / (elapsed_ms * 2000) * 100, 2)
+                wbt_is_estimated = bool(e.get("wbtIsEstimated"))
+            else:
+                wbt_pct = None
+                wbt_is_estimated = False
             result.append({
                 "id": e["id"],
                 "raceId": e["raceId"],
@@ -290,9 +299,30 @@ class RowingServices:
                 "keyPerson": key_person,
                 "startTime": e["startTime"],
                 "finishTime": e["finishTime"],
-                "elapsedMs": e["elapsedMs"],
+                "elapsedMs": elapsed_ms,
                 "dns": bool(e["dns"]),
                 "dnf": bool(e["dnf"]),
                 "placement": e["placement"],
+                "gender": e.get("gender"),
+                "ageCategory": e.get("ageCategory"),
+                "boatClassSymbol": e.get("boatClassSymbol"),
+                "wbtPct": wbt_pct,
+                "wbtIsEstimated": wbt_is_estimated,
             })
         return result
+
+    # ── World Best Times ────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_world_best_times():
+        return [
+            {
+                "id": r["id"],
+                "gender": r["gender"],
+                "ageCategory": r["ageCategory"],
+                "boatSymbol": r["boatSymbol"],
+                "timeMs": r["timeMs"],
+                "isEstimated": bool(r["isEstimated"]),
+            }
+            for r in RowingModels.fetch_world_best_times()
+        ]

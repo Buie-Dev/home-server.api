@@ -351,3 +351,14 @@ def delete_entry(entry_id: int):
     except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to delete entry"}, 500)
+
+
+# ── World Best Times ────────────────────────────────────────────────────────────
+
+@rowing.route("/world-best-times", methods=["GET"])
+def fetch_world_best_times():
+    try:
+        return format_return(RowingControllers.fetch_world_best_times())
+    except Exception:
+        traceback.print_exc()
+        return error_return({"error": "Failed to fetch world best times"}, 500)

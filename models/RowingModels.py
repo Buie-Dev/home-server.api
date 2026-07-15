@@ -271,13 +271,21 @@ class RowingModels:
                 e.elapsed_ms AS elapsedMs, e.dns, e.dnf, e.placement,
                 cox_m.name AS coxName,
                 s1.name AS strokeName,
-                bc.has_cox AS boatHasCox
+                bc.has_cox AS boatHasCox,
+                cr.gender, cr.age_category AS ageCategory,
+                bc.symbol AS boatClassSymbol,
+                wbt.time_ms AS wbtTimeMs,
+                wbt.is_estimated AS wbtIsEstimated
             FROM rowing_race_entries e
             LEFT JOIN rowing_crews cr ON e.crew_id = cr.id
             LEFT JOIN rowing_boats b ON cr.boat_id = b.id
             LEFT JOIN rowing_boat_classes bc ON b.boat_class_id = bc.id
             LEFT JOIN rowing_crew_members cox_m ON cr.cox = cox_m.id
             LEFT JOIN rowing_crew_members s1 ON cr.seat_1 = s1.id
+            LEFT JOIN rowing_world_best_times wbt ON
+                wbt.gender = cr.gender AND
+                wbt.age_category = cr.age_category AND
+                wbt.boat_symbol = bc.symbol
             WHERE e.race_id = %s AND e.deleted_at IS NULL
             ORDER BY e.placement ASC, e.elapsed_ms ASC
             """,
@@ -343,4 +351,17 @@ class RowingModels:
         return Base.custom_update(
             "UPDATE rowing_race_entries SET deleted_at = NOW() WHERE id = %s",
             (entry_id,),
+        )
+
+    # ── World Best Times ────────────────────────────────────────────────────
+
+    @staticmethod
+    def fetch_world_best_times():
+        return Base.custom_query(
+            """
+            SELECT id, gender, age_category AS ageCategory, boat_symbol AS boatSymbol,
+                   time_ms AS timeMs, is_estimated AS isEstimated
+            FROM rowing_world_best_times
+            ORDER BY gender, age_category, boat_symbol
+            """
         )
