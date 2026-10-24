@@ -235,7 +235,7 @@ class RowingModels:
     def create_race(distance: str, race_type: str, event_type: Optional[str],
                     wind_conditions: Optional[str], notes: Optional[str]):
         return Base.custom_insert(
-            "INSERT INTO rowing_races (distance, race_type, event_type, wind_conditions, notes) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO rowing_races (distance, race_type, event_type, wind_conditions, notes, status) VALUES (%s, %s, %s, %s, %s, 'active')",
             (distance, race_type, event_type, wind_conditions, notes),
         )
 

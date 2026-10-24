@@ -90,20 +90,13 @@ class RowingServices:
                     seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
                     seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
         RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
-        if RowingModels.crew_has_results(crew_id):
-            if not RowingModels.fetch_crew(crew_id):
-                raise ValueError("Crew not found")
-            new_id = RowingModels.create_crew(
-                boat_id, gender, age_category, cox,
-                seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
-            )["inserted_id"]
-            return {"id": new_id, "copied": True}
-        else:
-            RowingModels.update_crew(
-                crew_id, boat_id, gender, age_category, cox,
-                seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
-            )
-            return {"id": crew_id, "copied": False}
+        if not RowingModels.fetch_crew(crew_id):
+            raise ValueError("Crew not found")
+        RowingModels.update_crew(
+            crew_id, boat_id, gender, age_category, cox,
+            seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )
+        return {"id": crew_id, "copied": False}
 
     @staticmethod
     def update_crew_lineup(crew_id: int, boat_id: int, gender: str, age_category: str,
