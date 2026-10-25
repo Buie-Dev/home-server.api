@@ -1,5 +1,6 @@
-from models.PeopleModels import PeopleModels
 from typing import List, Optional
+
+from models.PeopleModels import PeopleModels
 
 
 class PeopleServices:

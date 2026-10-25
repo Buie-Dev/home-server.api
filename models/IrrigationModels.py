@@ -1,11 +1,12 @@
-from models.Base import Base
+from typing import List, Optional
+
 from lib.dates import get_vancouver_date_context
-from typing import List, TypedDict, Optional
+from models.Base import Base
 from ObjectTypes import (
+    AutomationSchedule,
+    CreateScheduleParams,
     ModelZone,
     Subzone,
-    CreateScheduleParams,
-    AutomationSchedule,
     ToggleScheduleParams,
     ZoneType,
 )
@@ -82,7 +83,7 @@ class IrrigationModels:
         # Create placeholders for each subzone_id
         placeholders = ",".join(["(%s,%s)"] * len(subzone_ids))
         sql = f"""
-            INSERT INTO subzone_schedules (schedule_id, subzone_id) 
+            INSERT INTO subzone_schedules (schedule_id, subzone_id)
             VALUES {placeholders}
         """
         # Create a flat list of parameters (schedule_id, subzone_id) for each subzone
@@ -133,10 +134,10 @@ class IrrigationModels:
         connection = Base.get_connection()
         params = []
         sql = """
-            SELECT 
-                z.id, 
-                z.name, 
-                z.zone, 
+            SELECT
+                z.id,
+                z.name,
+                z.zone,
                 zt.type
             FROM zones AS z
             JOIN zone_types AS zt ON z.zone_type_id = zt.id

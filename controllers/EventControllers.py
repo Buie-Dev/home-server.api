@@ -1,5 +1,6 @@
-from services.EventServices import EventServices
 from typing import List, Optional
+
+from services.EventServices import EventServices
 
 
 class EventControllers:

@@ -182,7 +182,7 @@ class TestIrrigationServicesHistoryTotals:
 
 class TestCreateHistory:
     def test_splits_litres_by_heads(self):
-        from unittest.mock import patch, call
+        from unittest.mock import patch
 
         params = {
             "zone_id": 1,

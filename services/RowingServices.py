@@ -1,5 +1,6 @@
-from models.RowingModels import RowingModels
 from typing import List, Optional
+
+from models.RowingModels import RowingModels
 
 
 class RowingServices:

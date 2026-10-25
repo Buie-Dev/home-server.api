@@ -1,10 +1,12 @@
 import traceback
+
 import bcrypt
-from flask import Blueprint, g, request, jsonify
-from models.UserModels import UserModels
+from flask import Blueprint, g, jsonify, request
+
+from lib.auth import check_user_auth, create_token, is_internal_request
 from models.PermissionsModels import PermissionsModels
-from lib.auth import create_token, is_internal_request, check_user_auth
-from routes.base import format_return, error_return
+from models.UserModels import UserModels
+from routes.base import error_return, format_return
 
 auth = Blueprint("auth", __name__)
 
@@ -29,7 +31,7 @@ def login():
 
         token = create_token(user["id"], user["username"])
         return jsonify({"token": token})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Login failed"}, 500)
 

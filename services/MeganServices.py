@@ -1,5 +1,6 @@
-from models.MeganModels import MeganModels
 from typing import List, Optional
+
+from models.MeganModels import MeganModels
 
 
 class MeganServices:

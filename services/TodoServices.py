@@ -1,6 +1,7 @@
 from datetime import datetime
-from models.TodoModels import TodoModels
 from typing import List, Optional
+
+from models.TodoModels import TodoModels
 
 
 class TodoServices:

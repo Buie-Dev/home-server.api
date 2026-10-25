@@ -1,8 +1,10 @@
 import traceback
+
 from flask import Blueprint, g, request
+
 from controllers.PeopleControllers import PeopleControllers
-from routes.base import format_return, error_return
 from lib.auth import check_user_auth
+from routes.base import error_return, format_return
 
 people = Blueprint("people", __name__)
 people.before_request(check_user_auth)

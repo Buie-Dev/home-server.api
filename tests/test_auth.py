@@ -1,6 +1,7 @@
-import jwt
 import time
 from unittest.mock import patch
+
+import jwt
 
 
 class TestHealthCheck:

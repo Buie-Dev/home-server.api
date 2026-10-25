@@ -1,5 +1,6 @@
-from models.Base import Base
 from typing import Optional
+
+from models.Base import Base
 
 
 class PeopleModels:

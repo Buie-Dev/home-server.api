@@ -2,6 +2,7 @@ import json
 import logging
 import threading
 import time
+
 import paho.mqtt.client as mqtt
 
 from config.config import Config

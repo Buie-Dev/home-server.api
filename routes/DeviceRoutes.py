@@ -1,9 +1,10 @@
 import traceback
 
 from flask import Blueprint, request
+
 from controllers.DeviceControllers import DeviceControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 devices = Blueprint("devices", __name__)
 devices.before_request(check_auth)

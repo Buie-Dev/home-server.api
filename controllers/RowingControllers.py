@@ -1,5 +1,6 @@
-from services.RowingServices import RowingServices
 from typing import List, Optional
+
+from services.RowingServices import RowingServices
 
 
 class RowingControllers:

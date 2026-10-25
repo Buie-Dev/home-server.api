@@ -1,5 +1,6 @@
-from models.EventModels import EventModels
 from typing import List, Optional
+
+from models.EventModels import EventModels
 
 
 class EventServices:

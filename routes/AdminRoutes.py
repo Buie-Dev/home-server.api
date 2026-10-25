@@ -1,10 +1,12 @@
 import traceback
+
 import bcrypt
 from flask import Blueprint, g, request
+
+from lib.auth import check_user_auth, is_internal_request
 from models.PermissionsModels import PermissionsModels
 from models.UserModels import UserModels
-from lib.auth import check_user_auth, is_internal_request
-from routes.base import format_return, error_return
+from routes.base import error_return, format_return
 
 admin = Blueprint("admin", __name__)
 

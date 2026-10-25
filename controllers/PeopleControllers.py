@@ -1,5 +1,6 @@
-from services.PeopleServices import PeopleServices
 from typing import List, Optional
+
+from services.PeopleServices import PeopleServices
 
 
 class PeopleControllers:

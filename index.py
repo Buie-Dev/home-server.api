@@ -1,19 +1,18 @@
-from typing import Any, Dict, List, Optional
-from flask_cors import CORS
-
+from typing import Any
 
 from flasgger import Swagger
 from flask import Flask, jsonify
+from flask_cors import CORS
 
-from routes.IrrigationRoutes import irrigation
+from routes.AdminRoutes import admin
 from routes.AuthRoutes import auth
 from routes.DeviceRoutes import devices
+from routes.EventRoutes import events
+from routes.IrrigationRoutes import irrigation
 from routes.MeganRoutes import megan
 from routes.PeopleRoutes import people
-from routes.AdminRoutes import admin
-from routes.TodoRoutes import todo
-from routes.EventRoutes import events
 from routes.RowingRoutes import rowing
+from routes.TodoRoutes import todo
 
 app = Flask(__name__)
 Swagger(app)

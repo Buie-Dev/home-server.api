@@ -1,14 +1,15 @@
-from models.IrrigationModels import IrrigationModels
+import json
+from typing import List, Optional
+
 from lib.irrigation import create_automation_command
+from models.IrrigationModels import IrrigationModels
 from ObjectTypes import (
-    Zone,
-    CreateScheduleParams,
     AutomationCommand,
+    CreateScheduleParams,
     ToggleScheduleParams,
+    Zone,
     ZoneType,
 )
-from typing import List, Optional
-import json
 
 
 class IrrigationServices:
@@ -373,5 +374,5 @@ class IrrigationServices:
                 print(f"[history] inserting subzone record: {sz_params}")
                 IrrigationModels.create_history(sz_params)
             return
-        print(f"[history] inserting zone-level record")
+        print("[history] inserting zone-level record")
         return IrrigationModels.create_history(params)

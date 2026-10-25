@@ -1,7 +1,9 @@
-import jwt
 import datetime
 from typing import Optional
-from flask import g, request, jsonify
+
+import jwt
+from flask import g, jsonify, request
+
 from config.config import Config
 
 INTERNAL_PREFIXES = ("192.168.1.", "172.", "127.", "192.168.65.")

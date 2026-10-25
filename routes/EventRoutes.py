@@ -1,8 +1,10 @@
 import traceback
+
 from flask import Blueprint, request
+
 from controllers.EventControllers import EventControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 events = Blueprint("events", __name__)
 events.before_request(check_auth)

@@ -1,12 +1,11 @@
-from typing import Any, Dict, List, Optional
-from ObjectTypes import Zone
 import traceback
-import json
+from typing import Any
 
-from flask import Blueprint, Flask, jsonify, request
+from flask import Blueprint, request
+
 from controllers.IrrigationControllers import IrrigationControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 irrigation = Blueprint("irrigation", __name__)
 irrigation.before_request(check_auth)
@@ -121,7 +120,7 @@ def check_sync() -> Any:
     try:
         data = IrrigationControllers.check_sync()
         return format_return(data)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to check sync status"}, 500)
 
@@ -131,7 +130,7 @@ def force_sync() -> Any:
     try:
         data = IrrigationControllers.force_sync()
         return format_return(data)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to force sync"}, 500)
 
@@ -208,7 +207,7 @@ def create_history() -> Any:
         data = request.get_json()
         print(f"[history] POST received: {data}")
         IrrigationControllers.create_history(data)
-        print(f"[history] saved ok")
+        print("[history] saved ok")
         return format_return({"Success": True})
     except Exception as e:
         traceback.print_exc()

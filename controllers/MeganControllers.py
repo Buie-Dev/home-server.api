@@ -1,5 +1,6 @@
-from services.MeganServices import MeganServices
 from typing import List, Optional
+
+from services.MeganServices import MeganServices
 
 
 class MeganControllers:

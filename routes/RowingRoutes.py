@@ -1,8 +1,10 @@
 import traceback
+
 from flask import Blueprint, request
+
 from controllers.RowingControllers import RowingControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 rowing = Blueprint("rowing", __name__)
 rowing.before_request(check_auth)

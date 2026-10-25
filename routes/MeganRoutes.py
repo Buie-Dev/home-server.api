@@ -1,8 +1,10 @@
 import traceback
+
 from flask import Blueprint, request
+
 from controllers.MeganControllers import MeganControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 megan = Blueprint("megan", __name__)
 megan.before_request(check_auth)
@@ -13,7 +15,7 @@ def fetch_categories():
     try:
         data = MeganControllers.fetch_categories()
         return format_return(data)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to fetch categories"}, 500)
 
@@ -27,7 +29,7 @@ def create_category():
             subcategory_names=data.get("subcategoryNames", []),
         )
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to create category"}, 500)
 
@@ -38,7 +40,7 @@ def update_category(id: int):
         data = request.get_json()
         MeganControllers.update_category(id, data["name"])
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to update category"}, 500)
 
@@ -49,7 +51,7 @@ def add_subcategory(id: int):
         data = request.get_json()
         MeganControllers.create_subcategory(id, data["name"])
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to add subcategory"}, 500)
 
@@ -60,7 +62,7 @@ def update_subcategory(id: int):
         data = request.get_json()
         MeganControllers.update_subcategory(id, data["name"])
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to update subcategory"}, 500)
 
@@ -70,7 +72,7 @@ def delete_subcategory(id: int):
     try:
         MeganControllers.delete_subcategory(id)
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to delete subcategory"}, 500)
 
@@ -82,7 +84,7 @@ def delete_category(id: int):
         return format_return({"success": True})
     except ValueError as e:
         return error_return({"error": str(e)}, 409)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to delete category"}, 500)
 
@@ -94,7 +96,7 @@ def fetch_ideas():
         subcategory_id = request.args.get("subcategoryId", type=int, default=None)
         data = MeganControllers.fetch_ideas(category_id, subcategory_id)
         return format_return(data)
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to fetch ideas"}, 500)
 
@@ -110,7 +112,7 @@ def create_idea():
             subcategory_id=data.get("subcategoryId"),
         )
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to create idea"}, 500)
 
@@ -127,7 +129,7 @@ def update_idea(id: int):
             subcategory_id=data.get("subcategoryId"),
         )
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to update idea"}, 500)
 
@@ -138,7 +140,7 @@ def toggle_idea(id: int):
         data = request.get_json()
         MeganControllers.toggle_idea(id, data["completed"])
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to toggle idea"}, 500)
 
@@ -148,6 +150,6 @@ def delete_idea(id: int):
     try:
         MeganControllers.delete_idea(id)
         return format_return({"success": True})
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
         return error_return({"error": "Failed to delete idea"}, 500)

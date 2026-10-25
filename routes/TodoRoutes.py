@@ -1,8 +1,10 @@
 import traceback
+
 from flask import Blueprint, request
+
 from controllers.TodoControllers import TodoControllers
-from routes.base import format_return, error_return
 from lib.auth import check_auth
+from routes.base import error_return, format_return
 
 todo = Blueprint("todo", __name__)
 todo.before_request(check_auth)

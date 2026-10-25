@@ -1,13 +1,14 @@
-from services.IrrigationServices import IrrigationServices
 from typing import List, Optional
+
+from mqtt import mqtt
 from ObjectTypes import (
-    Zone,
-    CreateScheduleParams,
     AutomationCommand,
+    CreateScheduleParams,
     ToggleScheduleParams,
+    Zone,
     ZoneType,
 )
-from mqtt import mqtt
+from services.IrrigationServices import IrrigationServices
 
 mqtt_client = mqtt.run_mqtt()
 
@@ -22,7 +23,7 @@ class IrrigationControllers:
 
         schedule_id = IrrigationServices.create_schedule(data)
         zone = IrrigationServices.fetch_zone(data["zone_id"])
-        automation_command = create_automation_command(zone, data, schedule_id)
+        automation_command = create_automation_command(zone, data, schedule_id)  # noqa: F821
         mqtt.publish_add_schedule(mqtt_client, automation_command)
 
     @staticmethod
