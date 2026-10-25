@@ -22,7 +22,7 @@ sub_topics = [TOPIC_SUB_HEALTH_CHECK_REQUEST, TOPIC_SUB_SCHEDULE_STATUS_RESPONSE
 _status_event = threading.Event()
 _latest_status_schedules = None
 
-logger.info("Config.MQTT %s %s %s %s", Config.MQTT_BROKER, Config.MQTT_PASSWORD, Config.MQTT_PORT, Config.MQTT_USERNAME)
+logger.info("MQTT config: broker=%s port=%s", Config.MQTT_BROKER, Config.MQTT_PORT)
 
 
 # Callback when the client connects to the broker

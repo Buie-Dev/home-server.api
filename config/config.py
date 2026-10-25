@@ -34,14 +34,6 @@ class Config:
 
     @staticmethod
     def get_db_config():
-        print(
-            {
-                "host": Config.API_MYSQL_HOST,
-                "user": Config.API_MYSQL_USERNAME,
-                "password": Config.API_MYSQL_PASSWORD,
-                "database": Config.API_MYSQL_DATABASE,
-            }
-        )
         return {
             "host": Config.API_MYSQL_HOST,
             "user": Config.API_MYSQL_USERNAME,

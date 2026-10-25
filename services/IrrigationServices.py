@@ -101,10 +101,8 @@ class IrrigationServices:
                 zone["subzones"].append(subzone)
 
             return zones
-        except Exception as e:
-            print(e)
-            print("Error Fetching Zones in Service", e)
-            raise e
+        except Exception:
+            raise
 
     @staticmethod
     def fetch_zone(id: int) -> Zone:
@@ -120,10 +118,8 @@ class IrrigationServices:
             }
 
             return zone
-        except Exception as e:
-            print(e)
-            print("Error Fetching Zones in Service", e)
-            raise e
+        except Exception:
+            raise
 
     @staticmethod
     def fetch_automation_schedule(id: int) -> AutomationCommand:
@@ -140,7 +136,6 @@ class IrrigationServices:
         automation_schedules = IrrigationModels.fetch_automation_schedules(
             exclude_inactive=exclude_inactive, include_deleted=include_deleted
         )
-        print(f"---------------------------automation_schedules: {automation_schedules}")
         automation_schedules_formatted = [
             {
                 **automation_schedule,
@@ -344,14 +339,9 @@ class IrrigationServices:
     @staticmethod
     def create_history(params):
         subzone_ids = params.get("subzone_ids") or []
-        print(
-            f"[history] create_history: zone_id={params.get('zone_id')}, subzone_ids={subzone_ids}, litres={params.get('litres')}"
-        )
         if subzone_ids:
             subzones = IrrigationModels.fetch_subzones_by_ids(subzone_ids)
-            print(f"[history] fetched subzones: {subzones}")
             total_heads = sum(sz.get("heads", 0) for sz in subzones)
-            print(f"[history] total_heads={total_heads}")
             if total_heads > 0:
                 for sz in subzones:
                     sz_params = {
@@ -359,11 +349,8 @@ class IrrigationServices:
                         "subzone_id": sz["id"],
                         "litres": round(params["litres"] * (sz.get("heads", 0) / total_heads), 2),
                     }
-                    print(f"[history] inserting subzone record: {sz_params}")
                     IrrigationModels.create_history(sz_params)
                 return
-            # No heads defined: divide equally among subzones (1 subzone = full volume)
-            print(f"[history] total_heads=0, dividing equally among {len(subzones)} subzone(s)")
             equal_litres = round(params["litres"] / len(subzones), 2)
             for sz in subzones:
                 sz_params = {
@@ -371,8 +358,6 @@ class IrrigationServices:
                     "subzone_id": sz["id"],
                     "litres": equal_litres,
                 }
-                print(f"[history] inserting subzone record: {sz_params}")
                 IrrigationModels.create_history(sz_params)
             return
-        print("[history] inserting zone-level record")
         return IrrigationModels.create_history(params)

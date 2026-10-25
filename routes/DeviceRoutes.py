@@ -1,10 +1,12 @@
-import traceback
+import logging
 
 from flask import Blueprint, request
 
 from controllers.DeviceControllers import DeviceControllers
 from lib.auth import check_auth
 from routes.base import error_return, format_return
+
+logger = logging.getLogger(__name__)
 
 devices = Blueprint("devices", __name__)
 devices.before_request(check_auth)
@@ -15,9 +17,8 @@ def fetch_devices():
     try:
         data = DeviceControllers.fetch_devices()
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching devices: {e}")
+    except Exception:
+        logger.exception("Error fetching devices")
         return error_return({"error": "Failed to fetch devices"}, 500)
 
 
@@ -27,7 +28,6 @@ def create_battery_log():
         data = request.get_json()
         DeviceControllers.create_battery_log(data)
         return format_return({"success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error creating battery log: {e}")
+    except Exception:
+        logger.exception("Error creating battery log")
         return error_return({"error": "Failed to create battery log"}, 500)

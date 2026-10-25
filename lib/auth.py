@@ -15,7 +15,6 @@ def is_internal_request() -> bool:
     remote_addr is set by the OS TCP stack and cannot be spoofed by headers.
     Covers: LAN (192.168.1.x), Docker bridge (172.x.x.x), loopback (127.x).
     """
-    print("Request remote addr: ", request.remote_addr)
     ip = request.remote_addr
     return any(ip.startswith(prefix) for prefix in INTERNAL_PREFIXES)
 

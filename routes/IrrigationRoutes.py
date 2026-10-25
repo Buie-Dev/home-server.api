@@ -1,3 +1,4 @@
+import logging
 import traceback
 from typing import Any
 
@@ -6,6 +7,8 @@ from flask import Blueprint, request
 from controllers.IrrigationControllers import IrrigationControllers
 from lib.auth import check_auth
 from routes.base import error_return, format_return
+
+logger = logging.getLogger(__name__)
 
 irrigation = Blueprint("irrigation", __name__)
 irrigation.before_request(check_auth)
@@ -18,9 +21,8 @@ def schedules() -> Any:
         subzone_id = request.args.get("subzoneId", type=int, default=None)
         data = IrrigationControllers.schedules(zone_id, subzone_id)
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching schedules: {e}")
+    except Exception:
+        logger.exception("Error fetching schedules")
         return error_return({"error": "Failed to fetch schedules"}, 500)
 
 
@@ -47,9 +49,8 @@ def create_schedule() -> Any:
         IrrigationControllers.create_schedule(params)
 
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error creating schedule: {e}")
+    except Exception:
+        logger.exception("Error creating schedule")
         return error_return({"error": "Failed to create schedule"}, 500)
 
 
@@ -73,9 +74,8 @@ def update_schedule(id: int) -> Any:
         }
         IrrigationControllers.update_schedule(id, params)
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error updating schedule: {e}")
+    except Exception:
+        logger.exception("Error updating schedule")
         return error_return({"error": "Failed to update schedule"}, 500)
 
 
@@ -86,9 +86,8 @@ def reorder_schedules() -> Any:
         ids = data["ids"]
         IrrigationControllers.reorder_schedules(ids)
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error reordering schedules: {e}")
+    except Exception:
+        logger.exception("Error reordering schedules")
         return error_return({"error": "Failed to reorder schedules"}, 500)
 
 
@@ -98,9 +97,8 @@ def toggle_schedule(id: int) -> Any:
         data = request.get_json()
         IrrigationControllers.toggle_schedule(id, data)
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error updating schedule: {e}")
+    except Exception:
+        logger.exception("Error toggling schedule")
         return error_return({"error": "Failed to update schedule"}, 500)
 
 
@@ -109,9 +107,8 @@ def delete_schedule(id: int) -> Any:
     try:
         IrrigationControllers.delete_schedule(id)
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error deleting schedule: {e}")
+    except Exception:
+        logger.exception("Error deleting schedule")
         return error_return({"error": "Failed to delete schedule"}, 500)
 
 
@@ -140,9 +137,8 @@ def fetch_automation_schedules() -> Any:
     try:
         data = IrrigationControllers.fetch_automation_schedules(exclude_inactive=True)
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching automation schedules: {e}")
+    except Exception:
+        logger.exception("Error fetching automation schedules")
         return error_return({"error": "Failed to fetch automation schedules"}, 500)
 
 
@@ -152,9 +148,8 @@ def fetch_zones() -> Any:
         zone_type_id = request.args.get("zoneTypeId", type=int, default=None)
         data = IrrigationControllers.fetch_zones(zone_type_id)
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching zones: {e}")
+    except Exception:
+        logger.exception("Error fetching zones")
         return error_return({"error": "Failed to fetch all zones"}, 500)
 
 
@@ -165,9 +160,8 @@ def fetch_history_totals() -> Any:
         subzone_id = request.args.get("subzoneId", default=None, type=int)
         data = IrrigationControllers.fetch_history_totals(zone_id=zone_id, subzone_id=subzone_id)
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching history totals: {e}")
+    except Exception:
+        logger.exception("Error fetching history totals")
         return error_return({"error": "Failed to fetch history totals"}, 500)
 
 
@@ -184,9 +178,8 @@ def fetch_history() -> Any:
             limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date
         )
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching history: {e}")
+    except Exception:
+        logger.exception("Error fetching history")
         return error_return({"error": "Failed to fetch history"}, 500)
 
 
@@ -195,9 +188,8 @@ def delete_history(id: int) -> Any:
     try:
         IrrigationControllers.delete_history(id)
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error deleting history: {e}")
+    except Exception:
+        logger.exception("Error deleting history")
         return error_return({"error": "Failed to delete history"}, 500)
 
 
@@ -205,13 +197,10 @@ def delete_history(id: int) -> Any:
 def create_history() -> Any:
     try:
         data = request.get_json()
-        print(f"[history] POST received: {data}")
         IrrigationControllers.create_history(data)
-        print("[history] saved ok")
         return format_return({"Success": True})
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error creating history: {e}")
+    except Exception:
+        logger.exception("Error creating history")
         return error_return({"error": "Failed to create history"}, 500)
 
 
@@ -220,7 +209,6 @@ def fetch_zone_types() -> Any:
     try:
         data = IrrigationControllers.fetch_zone_types()
         return format_return(data)
-    except Exception as e:
-        traceback.print_exc()
-        print(f"Error fetching zone types: {e}")
+    except Exception:
+        logger.exception("Error fetching zone types")
         return error_return({"error": "Failed to fetch zone types"}, 500)

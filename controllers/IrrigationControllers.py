@@ -1,5 +1,7 @@
+import logging
 from typing import List, Optional
 
+from lib.irrigation import create_automation_command
 from mqtt import mqtt
 from ObjectTypes import (
     AutomationCommand,
@@ -23,7 +25,7 @@ class IrrigationControllers:
 
         schedule_id = IrrigationServices.create_schedule(data)
         zone = IrrigationServices.fetch_zone(data["zone_id"])
-        automation_command = create_automation_command(zone, data, schedule_id)  # noqa: F821
+        automation_command = create_automation_command(zone, data, schedule_id)
         mqtt.publish_add_schedule(mqtt_client, automation_command)
 
     @staticmethod
@@ -41,11 +43,7 @@ class IrrigationControllers:
 
     @staticmethod
     def fetch_zones(zone_type_id: Optional[int] = None) -> List[Zone]:
-        try:
-            return IrrigationServices.fetch_zones(zone_type_id)
-        except Exception as e:
-            print("Error Fetching Zones in Controller", e)
-            raise e
+        return IrrigationServices.fetch_zones(zone_type_id)
 
     @staticmethod
     def fetch_automation_schedules(exclude_inactive=False) -> List[AutomationCommand]:
@@ -87,8 +85,8 @@ class IrrigationControllers:
             try:
                 automation_command = IrrigationServices.fetch_automation_schedule(schedule_id)
                 mqtt.publish_add_schedule(mqtt_client, automation_command)
-            except Exception as e:
-                print(f"Failed to republish schedule {schedule_id} after reorder: {e}")
+            except Exception:
+                logging.getLogger(__name__).exception("Failed to republish schedule %s after reorder", schedule_id)
 
     @staticmethod
     def fetch_zone_types() -> List[ZoneType]:
