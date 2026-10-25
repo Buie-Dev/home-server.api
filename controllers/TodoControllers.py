@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class TodoControllers:
-
     @staticmethod
     def fetch_categories():
         return TodoServices.fetch_categories()
@@ -37,16 +36,39 @@ class TodoControllers:
         return TodoServices.fetch_templates(category_id, subcategory_id)
 
     @staticmethod
-    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: list = [], month: Optional[int] = None):
-        return TodoServices.create_template(title, notes, category_id, subcategory_id, frequency, checklist_items, month)
+    def create_template(
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        checklist_items: list = [],
+        month: Optional[int] = None,
+    ):
+        return TodoServices.create_template(
+            title, notes, category_id, subcategory_id, frequency, checklist_items, month
+        )
 
     @staticmethod
-    def add_direct_task(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
+    def add_direct_task(
+        title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str
+    ):
         return TodoServices.add_direct_task(title, notes, category_id, subcategory_id, frequency)
 
     @staticmethod
-    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: list = [], month: Optional[int] = None):
-        return TodoServices.update_template(id, title, notes, category_id, subcategory_id, frequency, checklist_items, month)
+    def update_template(
+        id: int,
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        checklist_items: list = [],
+        month: Optional[int] = None,
+    ):
+        return TodoServices.update_template(
+            id, title, notes, category_id, subcategory_id, frequency, checklist_items, month
+        )
 
     @staticmethod
     def delete_template(id: int):

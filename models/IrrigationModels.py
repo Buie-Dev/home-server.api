@@ -12,7 +12,6 @@ from ObjectTypes import (
 
 
 class IrrigationModels:
-
     @staticmethod
     def schedules(zone_id: Optional[int] = None, subzone_id: Optional[int] = None):
         connection = Base.get_connection()
@@ -46,7 +45,9 @@ class IrrigationModels:
             sql += " AND s.zone_id = %s"
             params.append(zone_id)
         if subzone_id is not None:
-            sql += " AND EXISTS (SELECT 1 FROM subzone_schedules ss2 WHERE ss2.schedule_id = s.id AND ss2.subzone_id = %s)"
+            sql += (
+                " AND EXISTS (SELECT 1 FROM subzone_schedules ss2 WHERE ss2.schedule_id = s.id AND ss2.subzone_id = %s)"
+            )
             params.append(subzone_id)
         sql += " GROUP BY s.id, s.zone_id ORDER BY s.sort_order ASC"
 
@@ -85,9 +86,7 @@ class IrrigationModels:
             VALUES {placeholders}
         """
         # Create a flat list of parameters (schedule_id, subzone_id) for each subzone
-        params = [
-            param for subzone_id in subzone_ids for param in (schedule_id, subzone_id)
-        ]
+        params = [param for subzone_id in subzone_ids for param in (schedule_id, subzone_id)]
         return Base.custom_insert(sql, params=params, connection=connection)
 
     @staticmethod
@@ -199,9 +198,7 @@ class IrrigationModels:
         return Base.single_query(sql, params=params, connection=connection)
 
     @staticmethod
-    def fetch_automation_schedules(
-        exclude_inactive=False, include_deleted=False
-    ) -> List[AutomationSchedule]:
+    def fetch_automation_schedules(exclude_inactive=False, include_deleted=False) -> List[AutomationSchedule]:
         connection = Base.get_connection()
         conditions = []
         if not include_deleted:

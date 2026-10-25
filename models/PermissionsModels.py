@@ -1,10 +1,9 @@
 from models.Base import Base
 
-PAGES = ['irrigation', 'rowing', 'people', 'todo', 'events', 'devices', 'admin']
+PAGES = ["irrigation", "rowing", "people", "todo", "events", "devices", "admin"]
 
 
 class PermissionsModels:
-
     @staticmethod
     def fetch_user_pages(user_id: int) -> list:
         row = Base.single_query(
@@ -31,9 +30,7 @@ class PermissionsModels:
     @staticmethod
     def set_user_permissions(user_id: int, permissions: dict):
         vals = tuple(bool(permissions.get(page, False)) for page in PAGES)
-        existing = Base.single_query(
-            "SELECT user_id FROM user_permissions WHERE user_id = %s", (user_id,)
-        )
+        existing = Base.single_query("SELECT user_id FROM user_permissions WHERE user_id = %s", (user_id,))
         if existing:
             Base.custom_update(
                 """UPDATE user_permissions

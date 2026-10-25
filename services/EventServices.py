@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class EventServices:
-
     @staticmethod
     def fetch_categories():
         categories = EventModels.fetch_categories()
@@ -55,7 +54,12 @@ class EventServices:
         EventModels.delete_category(id)
 
     @staticmethod
-    def fetch_events(category_id: Optional[int] = None, subcategory_id: Optional[int] = None, month: Optional[int] = None, year: Optional[int] = None):
+    def fetch_events(
+        category_id: Optional[int] = None,
+        subcategory_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+    ):
         rows = EventModels.fetch_events(category_id, subcategory_id, month, year)
         return [
             {
@@ -73,11 +77,26 @@ class EventServices:
         ]
 
     @staticmethod
-    def create_event(title: str, description: Optional[str], date: str, time: Optional[str], category_id: int, subcategory_id: Optional[int]):
+    def create_event(
+        title: str,
+        description: Optional[str],
+        date: str,
+        time: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+    ):
         return EventModels.create_event(title, description, date, time, category_id, subcategory_id)
 
     @staticmethod
-    def update_event(id: int, title: str, description: Optional[str], date: str, time: Optional[str], category_id: int, subcategory_id: Optional[int]):
+    def update_event(
+        id: int,
+        title: str,
+        description: Optional[str],
+        date: str,
+        time: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+    ):
         return EventModels.update_event(id, title, description, date, time, category_id, subcategory_id)
 
     @staticmethod

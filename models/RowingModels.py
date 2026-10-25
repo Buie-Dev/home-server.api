@@ -38,7 +38,6 @@ _CREW_BASE_SQL = """
 
 
 class RowingModels:
-
     # ── Boat Classes ───────────────────────────────────────────────────────
 
     @staticmethod
@@ -152,10 +151,20 @@ class RowingModels:
         )
 
     @staticmethod
-    def create_crew(boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+    def create_crew(
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
         return Base.custom_insert(
             """
             INSERT INTO rowing_crews
@@ -166,10 +175,21 @@ class RowingModels:
         )
 
     @staticmethod
-    def update_crew(crew_id: int, boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+    def update_crew(
+        crew_id: int,
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
         return Base.custom_update(
             """
             UPDATE rowing_crews SET
@@ -178,7 +198,21 @@ class RowingModels:
                 seat_5 = %s, seat_6 = %s, seat_7 = %s, seat_8 = %s
             WHERE id = %s
             """,
-            (boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8, crew_id),
+            (
+                boat_id,
+                gender,
+                age_category,
+                cox,
+                seat_1,
+                seat_2,
+                seat_3,
+                seat_4,
+                seat_5,
+                seat_6,
+                seat_7,
+                seat_8,
+                crew_id,
+            ),
         )
 
     @staticmethod
@@ -232,8 +266,9 @@ class RowingModels:
         )
 
     @staticmethod
-    def create_race(distance: str, race_type: str, event_type: Optional[str],
-                    wind_conditions: Optional[str], notes: Optional[str]):
+    def create_race(
+        distance: str, race_type: str, event_type: Optional[str], wind_conditions: Optional[str], notes: Optional[str]
+    ):
         return Base.custom_insert(
             "INSERT INTO rowing_races (distance, race_type, event_type, wind_conditions, notes, status) VALUES (%s, %s, %s, %s, %s, 'active')",
             (distance, race_type, event_type, wind_conditions, notes),

@@ -2,7 +2,6 @@ from models.DeviceModels import DeviceModels
 
 
 class DeviceServices:
-
     @staticmethod
     def fetch_devices():
         rows = DeviceModels.fetch_devices()

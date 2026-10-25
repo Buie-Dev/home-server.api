@@ -13,7 +13,6 @@ mqtt_client = mqtt.run_mqtt()
 
 
 class IrrigationControllers:
-
     @staticmethod
     def schedules(zone_id: Optional[int] = None, subzone_id: Optional[int] = None):
         return IrrigationServices.schedules(zone_id, subzone_id)
@@ -95,8 +94,17 @@ class IrrigationControllers:
         return IrrigationServices.fetch_zone_types()
 
     @staticmethod
-    def fetch_history(limit: int = 100, offset: int = 0, zone_id: int = None, subzone_id: int = None, start_date: str = None, end_date: str = None):
-        return IrrigationServices.fetch_history(limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date)
+    def fetch_history(
+        limit: int = 100,
+        offset: int = 0,
+        zone_id: int = None,
+        subzone_id: int = None,
+        start_date: str = None,
+        end_date: str = None,
+    ):
+        return IrrigationServices.fetch_history(
+            limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date
+        )
 
     @staticmethod
     def fetch_history_totals(zone_id: int = None, subzone_id: int = None):

@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class RowingControllers:
-
     # ── Boat Classes ───────────────────────────────────────────────────────
 
     @staticmethod
@@ -53,26 +52,63 @@ class RowingControllers:
         return RowingServices.fetch_crews()
 
     @staticmethod
-    def create_crew(boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
-        return RowingServices.create_crew(boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+    def create_crew(
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
+        return RowingServices.create_crew(
+            boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )
 
     @staticmethod
-    def update_crew(crew_id: int, boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
-        return RowingServices.update_crew(crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+    def update_crew(
+        crew_id: int,
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
+        return RowingServices.update_crew(
+            crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )
 
     @staticmethod
-    def update_crew_lineup(crew_id: int, boat_id: int, gender: str, age_category: str,
-                           cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                           seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                           seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
-        return RowingServices.update_crew_lineup(crew_id, boat_id, gender, age_category, cox,
-                                                 seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+    def update_crew_lineup(
+        crew_id: int,
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
+        return RowingServices.update_crew_lineup(
+            crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )
 
     @staticmethod
     def delete_crew(crew_id: int):
@@ -89,8 +125,14 @@ class RowingControllers:
         return RowingServices.fetch_race(id)
 
     @staticmethod
-    def create_race(distance: str, race_type: str, crew_ids: List[int], event_type: Optional[str],
-                    wind_conditions: Optional[str], notes: Optional[str]):
+    def create_race(
+        distance: str,
+        race_type: str,
+        crew_ids: List[int],
+        event_type: Optional[str],
+        wind_conditions: Optional[str],
+        notes: Optional[str],
+    ):
         return RowingServices.create_race(distance, race_type, crew_ids, event_type, wind_conditions, notes)
 
     @staticmethod

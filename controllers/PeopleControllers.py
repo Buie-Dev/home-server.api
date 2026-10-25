@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class PeopleControllers:
-
     @staticmethod
     def fetch_people(user_id: int):
         return PeopleServices.fetch_people(user_id)

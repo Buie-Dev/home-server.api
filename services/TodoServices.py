@@ -4,7 +4,6 @@ from typing import List, Optional
 
 
 class TodoServices:
-
     @staticmethod
     def fetch_categories():
         categories = TodoModels.fetch_categories()
@@ -72,7 +71,15 @@ class TodoServices:
         return templates
 
     @staticmethod
-    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = [], month: Optional[int] = None):
+    def create_template(
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        checklist_items: List[str] = [],
+        month: Optional[int] = None,
+    ):
         result = TodoModels.create_template(title, notes, category_id, subcategory_id, frequency, month)
         template_id = result["id"]
         for i, text in enumerate(checklist_items):
@@ -81,11 +88,22 @@ class TodoServices:
         return result
 
     @staticmethod
-    def add_direct_task(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
+    def add_direct_task(
+        title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str
+    ):
         return TodoModels.add_direct_task(title, notes, category_id, subcategory_id, frequency)
 
     @staticmethod
-    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, checklist_items: List[str] = [], month: Optional[int] = None):
+    def update_template(
+        id: int,
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        checklist_items: List[str] = [],
+        month: Optional[int] = None,
+    ):
         TodoModels.update_template(id, title, notes, category_id, subcategory_id, frequency, month)
         TodoModels.delete_template_checklist(id)
         for i, text in enumerate(checklist_items):

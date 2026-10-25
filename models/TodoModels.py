@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class TodoModels:
-
     @staticmethod
     def fetch_categories():
         return Base.custom_query(
@@ -124,7 +123,14 @@ class TodoModels:
         )
 
     @staticmethod
-    def create_template(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, month: Optional[int] = None):
+    def create_template(
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        month: Optional[int] = None,
+    ):
         result = Base.custom_insert(
             "INSERT INTO todo_templates (title, notes, category_id, subcategory_id, frequency, month) VALUES (%s, %s, %s, %s, %s, %s)",
             (title, notes, category_id, subcategory_id, frequency, month),
@@ -132,14 +138,24 @@ class TodoModels:
         return {"id": result["inserted_id"]}
 
     @staticmethod
-    def add_direct_task(title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str):
+    def add_direct_task(
+        title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str
+    ):
         return Base.custom_insert(
             "INSERT INTO todo_tasks (title, notes, frequency, category_id, subcategory_id) VALUES (%s, %s, %s, %s, %s)",
             (title, notes, frequency, category_id, subcategory_id),
         )
 
     @staticmethod
-    def update_template(id: int, title: str, notes: Optional[str], category_id: int, subcategory_id: Optional[int], frequency: str, month: Optional[int] = None):
+    def update_template(
+        id: int,
+        title: str,
+        notes: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+        frequency: str,
+        month: Optional[int] = None,
+    ):
         return Base.custom_update(
             "UPDATE todo_templates SET title = %s, notes = %s, category_id = %s, subcategory_id = %s, frequency = %s, month = %s WHERE id = %s",
             (title, notes, category_id, subcategory_id, frequency, month, id),
@@ -218,7 +234,14 @@ class TodoModels:
         )
         result = Base.custom_insert(
             "INSERT INTO todo_tasks (template_id, title, notes, frequency, category_id, subcategory_id) VALUES (%s, %s, %s, %s, %s, %s)",
-            (template_id, template["title"], template.get("notes"), template["frequency"], template["category_id"], template.get("subcategory_id")),
+            (
+                template_id,
+                template["title"],
+                template.get("notes"),
+                template["frequency"],
+                template["category_id"],
+                template.get("subcategory_id"),
+            ),
         )
         task_id = result["inserted_id"]
         template_checklist = TodoModels.fetch_template_checklist([template_id])

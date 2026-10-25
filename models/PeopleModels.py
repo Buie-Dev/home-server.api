@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class PeopleModels:
-
     # ── Tracked people ─────────────────────────────────────────────────────────
 
     @staticmethod

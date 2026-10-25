@@ -2,7 +2,6 @@ from models.Base import Base
 
 
 class UserModels:
-
     @staticmethod
     def fetch_by_username(username: str):
         return Base.single_query(

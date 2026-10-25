@@ -2,7 +2,6 @@ from services.DeviceServices import DeviceServices
 
 
 class DeviceControllers:
-
     @staticmethod
     def fetch_devices():
         return DeviceServices.fetch_devices()

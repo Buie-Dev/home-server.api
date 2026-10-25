@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class MeganModels:
-
     @staticmethod
     def fetch_categories():
         return Base.custom_query(

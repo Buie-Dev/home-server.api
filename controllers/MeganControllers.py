@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class MeganControllers:
-
     @staticmethod
     def fetch_categories():
         return MeganServices.fetch_categories()

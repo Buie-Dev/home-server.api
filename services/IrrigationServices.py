@@ -12,7 +12,6 @@ import json
 
 
 class IrrigationServices:
-
     @staticmethod
     def schedules(zone_id: Optional[int] = None, subzone_id: Optional[int] = None):
         rows = IrrigationModels.schedules(zone_id, subzone_id)
@@ -67,9 +66,7 @@ class IrrigationServices:
         schedule_id = schedule_result["inserted_id"]
 
         if len(params["subzone_ids"]) > 0:
-            IrrigationModels.create_subzone_schedules(
-                schedule_id, params["subzone_ids"]
-            )
+            IrrigationModels.create_subzone_schedules(schedule_id, params["subzone_ids"])
 
         return schedule_id
 
@@ -80,7 +77,6 @@ class IrrigationServices:
     @staticmethod
     def fetch_zones(zone_type_id: Optional[int] = None) -> List[Zone]:
         try:
-
             zones_model = IrrigationModels.fetch_zones(zone_type_id)
             subzones = IrrigationModels.fetch_subzones()
 
@@ -112,7 +108,6 @@ class IrrigationServices:
     @staticmethod
     def fetch_zone(id: int) -> Zone:
         try:
-
             zone_model = IrrigationModels.fetch_zone(id)
             subzones = IrrigationModels.fetch_subzones(id)
 
@@ -144,9 +139,7 @@ class IrrigationServices:
         automation_schedules = IrrigationModels.fetch_automation_schedules(
             exclude_inactive=exclude_inactive, include_deleted=include_deleted
         )
-        print(
-            f"---------------------------automation_schedules: {automation_schedules}"
-        )
+        print(f"---------------------------automation_schedules: {automation_schedules}")
         automation_schedules_formatted = [
             {
                 **automation_schedule,
@@ -178,9 +171,7 @@ class IrrigationServices:
                     else (row["subzone_ids"] or [])
                 ),
             }
-            formatted["subzone_ids"] = [
-                i for i in formatted["subzone_ids"] if i is not None
-            ]
+            formatted["subzone_ids"] = [i for i in formatted["subzone_ids"] if i is not None]
             zone = IrrigationServices.fetch_zone(row["zone_id"])
             command = create_automation_command(zone, formatted, row["id"])
             result.append(command)
@@ -211,9 +202,7 @@ class IrrigationServices:
                 extra_in_automation.append(auto_id)
 
         return {
-            "in_sync": not missing_from_automation
-            and not mismatched
-            and not extra_in_automation,
+            "in_sync": not missing_from_automation and not mismatched and not extra_in_automation,
             "missing_from_automation": missing_from_automation,
             "mismatched": mismatched,
             "extra_in_automation": extra_in_automation,
@@ -235,9 +224,7 @@ class IrrigationServices:
         diffs = []
 
         if db_s.get("start_time") != auto_s.get("start_time"):
-            diffs.append(
-                f"start_time: db={db_s.get('start_time')} auto={auto_s.get('start_time')}"
-            )
+            diffs.append(f"start_time: db={db_s.get('start_time')} auto={auto_s.get('start_time')}")
 
         for day in IrrigationServices._DAY_KEYS:
             db_val = bool(db_s.get(day))
@@ -249,14 +236,10 @@ class IrrigationServices:
         auto_cmd = auto_s.get("command", {})
 
         if db_s.get("sort_order") != auto_cmd.get("priority"):
-            diffs.append(
-                f"priority: db={db_s.get('sort_order')} auto={auto_cmd.get('priority')}"
-            )
+            diffs.append(f"priority: db={db_s.get('sort_order')} auto={auto_cmd.get('priority')}")
 
         if db_cmd.get("duration") != auto_cmd.get("duration"):
-            diffs.append(
-                f"duration: db={db_cmd.get('duration')} auto={auto_cmd.get('duration')}"
-            )
+            diffs.append(f"duration: db={db_cmd.get('duration')} auto={auto_cmd.get('duration')}")
 
         if db_cmd.get("zone") != auto_cmd.get("zone"):
             diffs.append(f"zone: db={db_cmd.get('zone')} auto={auto_cmd.get('zone')}")
@@ -286,9 +269,7 @@ class IrrigationServices:
 
     @staticmethod
     def fetch_history_totals(zone_id: int = None, subzone_id: int = None):
-        row = IrrigationModels.fetch_history_totals(
-            zone_id=zone_id, subzone_id=subzone_id
-        )
+        row = IrrigationModels.fetch_history_totals(zone_id=zone_id, subzone_id=subzone_id)
         if not row:
             empty = {"litres": 0, "minutes": 0, "runs": 0}
             return {"today": empty, "week": empty, "month": empty}
@@ -375,9 +356,7 @@ class IrrigationServices:
                     sz_params = {
                         **params,
                         "subzone_id": sz["id"],
-                        "litres": round(
-                            params["litres"] * (sz.get("heads", 0) / total_heads), 2
-                        ),
+                        "litres": round(params["litres"] * (sz.get("heads", 0) / total_heads), 2),
                     }
                     print(f"[history] inserting subzone record: {sz_params}")
                     IrrigationModels.create_history(sz_params)

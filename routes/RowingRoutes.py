@@ -10,6 +10,7 @@ rowing.before_request(check_auth)
 
 # ── Boat Classes ───────────────────────────────────────────────────────────────
 
+
 @rowing.route("/boat-classes", methods=["GET"])
 def fetch_boat_classes():
     try:
@@ -20,6 +21,7 @@ def fetch_boat_classes():
 
 
 # ── Crew Members ───────────────────────────────────────────────────────────────
+
 
 @rowing.route("/crew", methods=["GET"])
 def fetch_crew_members():
@@ -65,6 +67,7 @@ def delete_crew_member(id: int):
 
 
 # ── Boats ──────────────────────────────────────────────────────────────────────
+
 
 @rowing.route("/boats", methods=["GET"])
 def fetch_boats():
@@ -112,6 +115,7 @@ def delete_boat(id: int):
 
 
 # ── Crews ──────────────────────────────────────────────────────────────────────
+
 
 @rowing.route("/crews", methods=["GET"])
 def fetch_crews():
@@ -214,6 +218,7 @@ def delete_crew(id: int):
 
 # ── Races ──────────────────────────────────────────────────────────────────────
 
+
 @rowing.route("/races", methods=["GET"])
 def fetch_races():
     try:
@@ -290,6 +295,7 @@ def delete_race(id: int):
 
 # ── Race Entries ───────────────────────────────────────────────────────────────
 
+
 @rowing.route("/entries/<int:entry_id>/start", methods=["POST"])
 def record_start(entry_id: int):
     try:
@@ -354,6 +360,7 @@ def delete_entry(entry_id: int):
 
 
 # ── World Best Times ────────────────────────────────────────────────────────────
+
 
 @rowing.route("/world-best-times", methods=["GET"])
 def fetch_world_best_times():

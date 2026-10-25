@@ -1,10 +1,6 @@
 def create_automation_command(zone, schedule, schedule_id) -> dict:
     # Get subzones from zone that match the subzones in schedule
-    subzones = [
-        {"id": s["subzone"], "state": 1}
-        for s in zone["subzones"]
-        if s["subzone"] in schedule["subzone_ids"]
-    ]
+    subzones = [{"id": s["subzone"], "state": 1} for s in zone["subzones"] if s["subzone"] in schedule["subzone_ids"]]
 
     return {
         "id": schedule_id,

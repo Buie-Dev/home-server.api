@@ -3,7 +3,6 @@ from typing import Optional
 
 
 class EventModels:
-
     @staticmethod
     def fetch_categories():
         return Base.custom_query(
@@ -71,7 +70,12 @@ class EventModels:
         )
 
     @staticmethod
-    def fetch_events(category_id: Optional[int] = None, subcategory_id: Optional[int] = None, month: Optional[int] = None, year: Optional[int] = None):
+    def fetch_events(
+        category_id: Optional[int] = None,
+        subcategory_id: Optional[int] = None,
+        month: Optional[int] = None,
+        year: Optional[int] = None,
+    ):
         params = []
         sql = """
             SELECT
@@ -105,14 +109,29 @@ class EventModels:
         return Base.custom_query(sql, params or None)
 
     @staticmethod
-    def create_event(title: str, description: Optional[str], date: str, time: Optional[str], category_id: int, subcategory_id: Optional[int]):
+    def create_event(
+        title: str,
+        description: Optional[str],
+        date: str,
+        time: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+    ):
         return Base.custom_insert(
             "INSERT INTO events (title, description, date, time, category_id, subcategory_id) VALUES (%s, %s, %s, %s, %s, %s)",
             (title, description, date, time, category_id, subcategory_id),
         )
 
     @staticmethod
-    def update_event(id: int, title: str, description: Optional[str], date: str, time: Optional[str], category_id: int, subcategory_id: Optional[int]):
+    def update_event(
+        id: int,
+        title: str,
+        description: Optional[str],
+        date: str,
+        time: Optional[str],
+        category_id: int,
+        subcategory_id: Optional[int],
+    ):
         return Base.custom_update(
             "UPDATE events SET title = %s, description = %s, date = %s, time = %s, category_id = %s, subcategory_id = %s WHERE id = %s",
             (title, description, date, time, category_id, subcategory_id, id),

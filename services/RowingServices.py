@@ -3,7 +3,6 @@ from typing import List, Optional
 
 
 class RowingServices:
-
     # ── Boat Classes ───────────────────────────────────────────────────────
 
     @staticmethod
@@ -74,41 +73,72 @@ class RowingServices:
         ]
 
     @staticmethod
-    def create_crew(boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+    def create_crew(
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
         RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
         return RowingModels.create_crew(
-            boat_id, gender, age_category, cox,
-            seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+            boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
         )["inserted_id"]
 
     @staticmethod
-    def update_crew(crew_id: int, boat_id: int, gender: str, age_category: str,
-                    cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                    seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                    seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+    def update_crew(
+        crew_id: int,
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
         RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
         if not RowingModels.fetch_crew(crew_id):
             raise ValueError("Crew not found")
         RowingModels.update_crew(
-            crew_id, boat_id, gender, age_category, cox,
-            seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+            crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
         )
         return {"id": crew_id, "copied": False}
 
     @staticmethod
-    def update_crew_lineup(crew_id: int, boat_id: int, gender: str, age_category: str,
-                           cox: Optional[int], seat_1: Optional[int], seat_2: Optional[int],
-                           seat_3: Optional[int], seat_4: Optional[int], seat_5: Optional[int],
-                           seat_6: Optional[int], seat_7: Optional[int], seat_8: Optional[int]):
+    def update_crew_lineup(
+        crew_id: int,
+        boat_id: int,
+        gender: str,
+        age_category: str,
+        cox: Optional[int],
+        seat_1: Optional[int],
+        seat_2: Optional[int],
+        seat_3: Optional[int],
+        seat_4: Optional[int],
+        seat_5: Optional[int],
+        seat_6: Optional[int],
+        seat_7: Optional[int],
+        seat_8: Optional[int],
+    ):
         """Always edits in place — used from the race results screen to correct who raced."""
         RowingServices._validate_crew_seats(cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
         if not RowingModels.fetch_crew(crew_id):
             raise ValueError("Crew not found")
-        RowingModels.update_crew(crew_id, boat_id, gender, age_category, cox,
-                                 seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8)
+        RowingModels.update_crew(
+            crew_id, boat_id, gender, age_category, cox, seat_1, seat_2, seat_3, seat_4, seat_5, seat_6, seat_7, seat_8
+        )
 
     @staticmethod
     def delete_crew(crew_id: int):
@@ -121,7 +151,9 @@ class RowingServices:
         return [
             {
                 **RowingServices._format_race(race),
-                "entries": RowingServices._format_entries(RowingModels.fetch_entries_for_race(race["id"]), race["distance"]),
+                "entries": RowingServices._format_entries(
+                    RowingModels.fetch_entries_for_race(race["id"]), race["distance"]
+                ),
             }
             for race in RowingModels.fetch_races(date)
         ]
@@ -137,8 +169,14 @@ class RowingServices:
         }
 
     @staticmethod
-    def create_race(distance: str, race_type: str, crew_ids: List[int], event_type: Optional[str],
-                    wind_conditions: Optional[str], notes: Optional[str]):
+    def create_race(
+        distance: str,
+        race_type: str,
+        crew_ids: List[int],
+        event_type: Optional[str],
+        wind_conditions: Optional[str],
+        notes: Optional[str],
+    ):
         if race_type not in ("time_trial", "side_by_side"):
             raise ValueError("race_type must be 'time_trial' or 'side_by_side'")
         if not crew_ids:
@@ -225,7 +263,9 @@ class RowingServices:
         gender = r.get("gender")
         age_cat = r.get("ageCategory")
         has_cox = r.get("boatClassHasCox")
-        crew_class_name = RowingServices._crew_class_name(gender, age_cat, symbol) if symbol and gender and age_cat else symbol
+        crew_class_name = (
+            RowingServices._crew_class_name(gender, age_cat, symbol) if symbol and gender and age_cat else symbol
+        )
 
         return {
             "id": r["id"],
@@ -282,26 +322,28 @@ class RowingServices:
             else:
                 wbt_pct = None
                 wbt_is_estimated = False
-            result.append({
-                "id": e["id"],
-                "raceId": e["raceId"],
-                "crewId": e.get("crewId"),
-                "boatName": e.get("boatName") or "Unknown",
-                "coxName": cox_name,
-                "strokeName": stroke_name,
-                "keyPerson": key_person,
-                "startTime": e["startTime"],
-                "finishTime": e["finishTime"],
-                "elapsedMs": elapsed_ms,
-                "dns": bool(e["dns"]),
-                "dnf": bool(e["dnf"]),
-                "placement": e["placement"],
-                "gender": e.get("gender"),
-                "ageCategory": e.get("ageCategory"),
-                "boatClassSymbol": e.get("boatClassSymbol"),
-                "wbtPct": wbt_pct,
-                "wbtIsEstimated": wbt_is_estimated,
-            })
+            result.append(
+                {
+                    "id": e["id"],
+                    "raceId": e["raceId"],
+                    "crewId": e.get("crewId"),
+                    "boatName": e.get("boatName") or "Unknown",
+                    "coxName": cox_name,
+                    "strokeName": stroke_name,
+                    "keyPerson": key_person,
+                    "startTime": e["startTime"],
+                    "finishTime": e["finishTime"],
+                    "elapsedMs": elapsed_ms,
+                    "dns": bool(e["dns"]),
+                    "dnf": bool(e["dnf"]),
+                    "placement": e["placement"],
+                    "gender": e.get("gender"),
+                    "ageCategory": e.get("ageCategory"),
+                    "boatClassSymbol": e.get("boatClassSymbol"),
+                    "wbtPct": wbt_pct,
+                    "wbtIsEstimated": wbt_is_estimated,
+                }
+            )
         return result
 
     # ── World Best Times ────────────────────────────────────────────────────

@@ -42,6 +42,7 @@ sys.modules["mqtt.mqtt"] = mock_mqtt_module
 
 # Re-export the real functions we need for mqtt tests
 import importlib
+
 _real_mqtt_path = "/".join(__file__.split("/")[:-2]) + "/mqtt/mqtt.py"
 
 import pytest

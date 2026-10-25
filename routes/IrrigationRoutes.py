@@ -181,7 +181,9 @@ def fetch_history() -> Any:
         subzone_id = request.args.get("subzoneId", default=None, type=int)
         start_date = request.args.get("startDate", default=None, type=str)
         end_date = request.args.get("endDate", default=None, type=str)
-        data = IrrigationControllers.fetch_history(limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date)
+        data = IrrigationControllers.fetch_history(
+            limit=limit, offset=offset, zone_id=zone_id, subzone_id=subzone_id, start_date=start_date, end_date=end_date
+        )
         return format_return(data)
     except Exception as e:
         traceback.print_exc()
